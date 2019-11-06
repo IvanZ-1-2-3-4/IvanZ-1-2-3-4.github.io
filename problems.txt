@@ -1,0 +1,2 @@
+-Acceleration is not right
+-need to make version where trajectory is premodeled
