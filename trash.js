@@ -2,9 +2,9 @@
 if (ball.posX > canvasWidth - ball.width) {
     // If ball hits the right wall, reverse direction
     ball.velX = -ball.velX * 0.5;
-    ball.posRealX = -(canvasWidth - ball.width) * widthReal / canvasWidth;
+    ball.posRealX = -(canvasWidth - ball.width) * canvasWidthReal / canvasWidth;
 } else if (ball.posX < ball.width) {
     // If ball hits the left wall, reverse direction
     ball.velX = -ball.velX * 0.5;
-    ball.posRealX = -ball.width * widthReal / canvasWidth;
+    ball.posRealX = -ball.width * canvasWidthReal / canvasWidth;
 }
