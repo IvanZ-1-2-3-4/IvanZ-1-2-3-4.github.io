@@ -1,6 +1,0 @@
--Acceleration is not right
--need to make version where trajectory is premodeled
-
-TO DO:
--Make ball fall smoothly when button is clicked using the precalculated approach
--Make precalculation reset at each press of the button
