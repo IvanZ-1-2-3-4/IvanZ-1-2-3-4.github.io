@@ -9,21 +9,34 @@
 
 <script src="jquery.min.js"></script>
 <script src="matter.min.js"></script>
-<script src="newmain.js"></script>
+<script src="main.js"></script>
 
 <body>
-    <canvas id="main-canvas" class="canvas b" width="1000px" height="500px"></canvas></br>
-    <button id="play" onclick="startSimulation()">play</button>
+    <div class="container" style="display: inline-block;">
+        <canvas id="main-canvas" class="canvas b" width="1000px" height="500px"></canvas></br>
+    </div>
+    <div class="container" style="display: inline-block;">
+        Canvas dimensions:</br>
+        Width:<input type="text" id="width" value="50"></br>
+        Height:<input id="height" type="text" value="25"></br>
+        <button id="set-dim" onclick="setDim()">Set Dimensions</button></br>
+        </br>
+        Position:</br> 
+        x:<input type="text" id="posx"></br> 
+        y:<input type="text" id="posy"></br>
+        <button id="set-pos" onclick="setPos()">Set Position</button></br>
+        </br>
+        Speed:</br> 
+        magnitude:<input type="text" id="speed"></br> 
+        angle:<input type="text" id="angle"></br>
+        x-velocity:<input type="text" id="velx"></br> 
+        y-velocity:<input type="text" id="vely"></br>
+        <button id="set-vel" onclick="setVel()">Set Velocity</button></br>
+        </br>
+        <input type="checkbox" id="trail" value="trail">Trail</br>
+    </div></br>
+    <button id="play" onclick="startClick()">play</button>
     <button id="pause">Pause</button>
-    Width:<input type="text" id="widthin">Height:<input id="heightin" type="text">
-    <button id="set-dimensions">Set dimensions</button>
-    </br>
-    Position: x:<input type="text" id="posx"> y:<input type="text" id="posy">
-    </br>
-    Speed: magnitude:<input type="text" id="speed"> angle:<input type="text" id="angle"></br>
-    x-velocity:<input type="text" id="velx"> y-velocity:<input type="text" id="vely"></br>
-    <input type="checkbox" id="trail" value="trail">Trail</br>
-    <button id="set-pos-vel">Update position and velocity</button></br>
-    <button id="bigreset">RESET RESET RESET</button>
+    <button id="reset" onclick="reset()">RESET RESET RESET</button>
 </body>
 </html>

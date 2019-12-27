@@ -1,15 +1,9 @@
--Acceleration is not right
--need to make version where trajectory is premodeled
-
 TO DO:
--Make ball fall smoothly when button is clicked using the precalculated approach
--Make precalculation reset at each press of the button
--Make loop have a set time interval
-
-IDEAS:
--At the end of every pause and measure, the velocity and position are updated to their desired positions after that
-much time has elapsed
-
-man i really want to go and lay on my bed and watch youtube rn but i have to keep working
-
-i want to fucking kill myself
+-Make sure simulation is actually accurate✔
+-Make sure x-movement works properly✔
+-Have a system for outputting ball stats✔
+-Have it reset the dimensions properly✔
+-Have a system for setting initial conditions✔
+-Have a collision detection and stop system
+-Have a trail that works properly
+-Have ball be draggable to change its position  
