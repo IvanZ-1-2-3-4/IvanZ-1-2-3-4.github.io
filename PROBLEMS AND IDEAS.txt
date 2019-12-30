@@ -4,6 +4,17 @@ TO DO:
 -Have a system for outputting ball stats✔
 -Have it reset the dimensions properly✔
 -Have a system for setting initial conditions✔
--Have a collision detection and stop system
+-Have a collision detection and stop system✔
+    -if pos < 0? or something else
+    -calculate the exact amount of time needed to reach endpoint
+    -if endpoint reached before next time set time to appropriate
+    
+-Change the baseline height to be so that the ball doesn't clip through walls
+-Have a timer
 -Have a trail that works properly
 -Have ball be draggable to change its position  
+-Make denote apex
+-Make rulers
+-Remove any imprecisions in transitioning between play and pause, between one
+bit of simulation to the next
+FUCK I WANNA MAKE A PRETTY TRAIL BUT FUCK I NEED TO DO OTHER SHIT

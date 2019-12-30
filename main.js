@@ -1,8 +1,8 @@
 // ---------------INIT VARIABLES---------------------
-const initVelX = 3;
-const initVelY = 4;
+const initVelX = 5;
+const initVelY = 20;
 const initPosX = 0;
-const initPosY = 0;
+const initPosY = 25;
 // --------------------------------------------------
 
 
@@ -21,14 +21,12 @@ let canvasHeight = Math.sqrt(canvasArea * canvasHeightReal / canvasWidthReal);
 let startTime = null;
 // Is animation running
 let isRunning = false;
-// If ball has made impact with the ground
-let impact = false;
 // Starting velocity
 let startVelX = initVelX;
 let startVelY = initVelY;
 // Starting position
 let startPosX = initPosX;
-let startPosY = initPosX;
+let startPosY = initPosY;
 // Gravity
 const g = -9.81;
 // --------------------------------------------------
@@ -42,6 +40,7 @@ let speedDisplay;
 let angleDisplay;
 let velXDisplay;
 let velYDisplay;
+let timeDisplay;
 // Canvas width display
 let canvasWidthDisplay;
 let canvasHeightDisplay;
@@ -111,10 +110,11 @@ $(document).ready(function() {
     angleDisplay = document.getElementById("angle");
     velXDisplay = document.getElementById("velx");
     velYDisplay = document.getElementById("vely");
+    timeDisplay = document.getElementById("time");
     canvasWidthDisplay = document.getElementById("width");
     canvasHeightDisplay = document.getElementById("height");
     // Print out initial data
-    printData();
+    printData(0);
 });
 
 
@@ -129,37 +129,42 @@ function animate(timestamp) {
     }
     // Set time
     let time = (timestamp - startTime) * 0.001;
-    
-    // Update ball's position
-    // s=ut+1/2at²
-    ball.posRealY = startPosY + (startVelY*time) + (0.5*g*Math.pow(time, 2));
-    // s=vt
-    ball.posRealX = startPosX + (startVelX*time);
 
-    // Update ball's velocity
-    ball.velX = startVelX;
-    ball.velY = startVelY + g*time;
+    // Time at which the ball is supposed to hit the ground
+    const impactTime = (-startVelY - Math.sqrt(Math.pow(startVelY, 2) - 2*g*startPosY)) / g;
+
+    // Check if time > time at which ball is supposed to hit the ground
+    if (time > impactTime) {
+        ball.posRealY = 0;
+        window.alert("ball has reached the ground at time " + time + " (since last pause, will change once timer is implemented");
+        isRunning = false;
+        impact = true;
+    } else {
+        // Update ball's position
+        ball.posRealY = startPosY + (startVelY*time) + (0.5*g*Math.pow(time, 2)); // s=ut+1/2at²
+        ball.posRealX = startPosX + (startVelX*time); // s=vt
+
+        // Update ball's velocity
+        ball.velX = startVelX;
+        ball.velY = startVelY + g*time;
+    }
 
     // Draw ball
     ball.draw();
-
     // Output ball stats
-    printData();
+    printData(time);
 
     // Continue or suspend the animation
     if (isRunning == true) {
         requestAnimationFrame(animate);
     } else {
-        if (impact == false) {
-            // Precisely determine new ball velocity
-            startVelY = startVelY + g*time;
-            startPosY = ball.posRealY;
-            startPosX = ball.posRealX;
-        } else {
-            // Ball stays at ground
-        }
         // Reset start time
         startTime = null;
+        // Set new start velocity and position
+        startVelX = ball.velX;
+        startVelY = ball.velY;
+        startPosX = ball.posRealX;
+        startPosY = ball.posRealY;
     }
 
     // Pause the animation
@@ -189,11 +194,14 @@ function reset() {
     // Reset ball position
     ball.posRealX = 0;
     ball.posRealY = canvasHeightReal;
+    // Reset ball velocity
+    ball.velX = 0;
+    ball.velY = 0;
 
     // Draw ball at new position
     ball.draw();
     // Print out new data
-    printData();
+    printData(0);
 }
 
 // Change dimensions of canvas
@@ -215,7 +223,7 @@ function setDim() {
         // Draw ball at new position
         ball.draw();
         // Print out new data
-        printData();
+        printData(null);
     }
 }
 
@@ -231,7 +239,7 @@ function setPos() {
         // Draw ball at new position
         ball.draw();
         // Print out new data
-        printData();
+        printData(null);
     }
 }
 
@@ -247,17 +255,21 @@ function setVel() {
         // Draw ball at new position
         ball.draw();
         // Print out new data
-        printData();
+        printData(null);
     }
 }
 
-function printData() {
-    // Output all ball data
+// Output all ball data
+function printData(time) {
     posXDisplay.value = ball.posRealX;
     posYDisplay.value = ball.posRealY;
     velXDisplay.value = ball.velX;
     velYDisplay.value = ball.velY;
     speedDisplay.value = ball.speed;
     angleDisplay.value = ball.angle;
+    // If not time update is needed, the parameter is passed as null
+    if (!(time == null)) {
+        timeDisplay.innerHTML = time;
+    }
 }
 // ----------------------------------------------------------------------------------------------------
