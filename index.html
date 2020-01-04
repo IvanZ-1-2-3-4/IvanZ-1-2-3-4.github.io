@@ -16,8 +16,8 @@
         <canvas id="main-canvas" class="canvas b" width="1000px" height="500px"></canvas></br>
     </div>
     <div class="container" style="display: inline-block;">
-        <div id="time" class="time-display"></div>
-        Canvas dimensions:</br>
+        <div id="time" class="time-display"></div></br>
+        Canvas Dimensions:</br>
         Width:<input type="text" id="width" value="50"></br>
         Height:<input id="height" type="text" value="25"></br>
         <button id="set-dim" onclick="setDim()">Set Dimensions</button></br>
@@ -28,16 +28,19 @@
         <button id="set-pos" onclick="setPos()">Set Position</button></br>
         </br>
         Speed:</br> 
-        magnitude:<input type="text" id="speed"></br> 
-        angle:<input type="text" id="angle"></br>
+        Magnitude:<input type="text" id="speed"></br> 
+        Angle:<input type="text" id="angle"></br>
+        <button id="set-vel-polar" onclick="setVelPolar()">Set Velocity (polar)</button></br>
         x-velocity:<input type="text" id="velx"></br> 
         y-velocity:<input type="text" id="vely"></br>
-        <button id="set-vel" onclick="setVel()">Set Velocity</button></br>
+        <button id="set-vel-rect" onclick="setVelRect()">Set Velocity (rect.)</button></br>
         </br>
-        <input type="checkbox" id="trail" value="trail">Trail</br>
+        <input type="checkbox" id="trail" checked>Trail</br>
     </div></br>
-    <button id="play" onclick="startClick()">play</button>
+    <button id="play" onclick="startClick()">Play</button>
     <button id="pause">Pause</button>
+    <input type="checkbox" id="timer" checked>Start Timer
+    <button id="reset-timer" onclick="resetTimer()">Reset Timer</button>
     <button id="reset" onclick="reset()">RESET RESET RESET</button>
 </body>
 </html>

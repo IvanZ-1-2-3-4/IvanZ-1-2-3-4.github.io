@@ -11,4 +11,6 @@
 .time-display {
     font-family: Arial;
     font-size: 26px;
+    color: rgb(238, 238, 238);
+    background-color: rgb(56, 56, 56);
 }

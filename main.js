@@ -1,8 +1,8 @@
 // ---------------INIT VARIABLES---------------------
-const initVelX = 5;
-const initVelY = 20;
+const initVelX = 50/(Math.sqrt(50*9.81)/9.81)/2;
+const initVelY = Math.sqrt(50*9.81);
 const initPosX = 0;
-const initPosY = 25;
+const initPosY = 0;
 // --------------------------------------------------
 
 
@@ -29,6 +29,10 @@ let startPosX = initPosX;
 let startPosY = initPosY;
 // Gravity
 const g = -9.81;
+// Timer time
+let timerTime = 0;
+// Starting time value at start of animation
+let startTimerTime = 0;
 // --------------------------------------------------
 
 
@@ -44,6 +48,9 @@ let timeDisplay;
 // Canvas width display
 let canvasWidthDisplay;
 let canvasHeightDisplay;
+//Checkboxes
+let timerInput;
+let trailInput;
 // --------------------------------------------------
 
 
@@ -53,10 +60,10 @@ let ball = {
     posRealY: initPosY,
     // Scale real position of the ball to obtain pixel position of the ball
     get posX() {
-        return this.posRealX * canvasWidth / canvasWidthReal;
+        return (this.posRealX * canvasWidth / canvasWidthReal) + this.width;
     },
     get posY() {
-        return canvasHeight - (this.posRealY * canvasHeight / canvasHeightReal);
+        return (canvasHeight - (this.posRealY * canvasHeight / canvasHeightReal)) - this.width;
     },
     velX: initVelX,
     velY: initVelY,
@@ -65,7 +72,7 @@ let ball = {
         return Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2)); // c=√a²+b²
     },
     get angle() {
-        return Math.atan(ball.velY / ball.velX) / Math.PI * 180; // θ=arctan(Vy/Vx)
+        return atan(this.velX, this.velY); // θ=arctan(Vy/Vx)
     },
     // Position of the ball at previous frame
     prevX: -100,
@@ -76,11 +83,13 @@ let ball = {
         let canvas = document.getElementById("main-canvas");
         let context = canvas.getContext("2d");
 
-        // Cover previous frame
+        /* Cover previous frame
         context.beginPath();
-        context.arc(this.prevX, this.prevY, this.width + 1, 0, 2 * Math.PI);
+        context.arc(this.prevX, this.prevY, this.width+1, 0, 2 * Math.PI);
         context.fillStyle = "#ffffff";
-        context.fill();
+        context.fill();*/
+
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
 
         // Draw new frame
         context.beginPath();
@@ -113,6 +122,8 @@ $(document).ready(function() {
     timeDisplay = document.getElementById("time");
     canvasWidthDisplay = document.getElementById("width");
     canvasHeightDisplay = document.getElementById("height");
+    timerInput = document.getElementById("timer");
+    trailInput = document.getElementById("trail");
     // Print out initial data
     printData(0);
 });
@@ -128,7 +139,9 @@ function animate(timestamp) {
         totalTime = 0;
     }
     // Set time
-    let time = (timestamp - startTime) * 0.001;
+    const time = (timestamp - startTime) * 0.001;
+    // If ball has made impact with ground
+    let impact = false;
 
     // Time at which the ball is supposed to hit the ground
     const impactTime = (-startVelY - Math.sqrt(Math.pow(startVelY, 2) - 2*g*startPosY)) / g;
@@ -136,7 +149,6 @@ function animate(timestamp) {
     // Check if time > time at which ball is supposed to hit the ground
     if (time > impactTime) {
         ball.posRealY = 0;
-        window.alert("ball has reached the ground at time " + time + " (since last pause, will change once timer is implemented");
         isRunning = false;
         impact = true;
     } else {
@@ -149,10 +161,24 @@ function animate(timestamp) {
         ball.velY = startVelY + g*time;
     }
 
+    // If the ball has hit the ground
+    if (impact == true) {
+        // Set timer time to time of impact
+        if (timerInput.checked == true) {
+            timerTime = startTimerTime + impactTime;
+            window.alert("ball has reached the ground at time " + timerTime);
+        }
+    } else {
+        // Increment timer time
+        if (timerInput.checked == true) {
+            timerTime = startTimerTime + time;
+        }
+    }
+
     // Draw ball
     ball.draw();
     // Output ball stats
-    printData(time);
+    printData(timerTime);
 
     // Continue or suspend the animation
     if (isRunning == true) {
@@ -160,6 +186,8 @@ function animate(timestamp) {
     } else {
         // Reset start time
         startTime = null;
+        // Set starting timer time to time of pause
+        startTimerTime = timerTime;
         // Set new start velocity and position
         startVelX = ball.velX;
         startVelY = ball.velY;
@@ -187,16 +215,18 @@ function reset() {
     // Reset all animation variables
     isRunning = false;
     startTime = null;
-    startVelX = 0;
-    startVelY = 0;
-    startPosX = 0;
-    startPosY = canvasHeightReal;
+    startVelX = initVelX;
+    startVelY = initVelY;
+    startPosX = initPosX;
+    startPosY = initPosY;
     // Reset ball position
-    ball.posRealX = 0;
-    ball.posRealY = canvasHeightReal;
+    ball.posRealX = initPosX;
+    ball.posRealY = initPosY;
     // Reset ball velocity
-    ball.velX = 0;
-    ball.velY = 0;
+    ball.velX = initVelX;
+    ball.velY = initVelY;
+    // Reset timer
+    resetTimer();
 
     // Draw ball at new position
     ball.draw();
@@ -204,13 +234,22 @@ function reset() {
     printData(0);
 }
 
+function resetTimer() {
+    // Only allow changes when simulation is paused
+    if (isRunning == false) {
+        timerTime = 0;
+        startTimerTime = 0;
+        printData(0);
+    }
+}
+
 // Change dimensions of canvas
 function setDim() {
-    // Only allow changes when simulation is running
+    // Only allow changes when simulation is paused
     if (isRunning == false) {
         // Get input width and height
-        canvasWidthReal = parseInt(document.getElementById("width").value);
-        canvasHeightReal = parseInt(document.getElementById("height").value);
+        canvasWidthReal = parseFloat(document.getElementById("width").value);
+        canvasHeightReal = parseFloat(document.getElementById("height").value);
 
         // Convert real width and height to pixel values
         canvasWidth = Math.sqrt(canvasArea * canvasWidthReal / canvasHeightReal);
@@ -229,12 +268,12 @@ function setDim() {
 
 // Set initial position
 function setPos() {
-    // Only allow changes when simulation is running
+    // Only allow changes when simulation is paused
     if (isRunning == false) {
-        ball.posRealX = parseInt(posXDisplay.value);
-        ball.posRealY = parseInt(posYDisplay.value);
-        startPosX = parseInt(posXDisplay.value);
-        startPosY = parseInt(posYDisplay.value);
+        ball.posRealX = parseFloat(posXDisplay.value);
+        ball.posRealY = parseFloat(posYDisplay.value);
+        startPosX = parseFloat(posXDisplay.value);
+        startPosY = parseFloat(posYDisplay.value);
 
         // Draw ball at new position
         ball.draw();
@@ -243,20 +282,38 @@ function setPos() {
     }
 }
 
-// Set initial velocity
-function setVel() {
-    // Only allow changes when simulation is running
+// Set initial rectangular velocity
+function setVelRect() {
+    // Only allow changes when simulation is paused
     if (isRunning == false) {
-        startVelX = parseInt(velXDisplay.value);
-        startVelY = parseInt(velYDisplay.value);
-        ball.velX = parseInt(velXDisplay.value);
-        ball.velY = parseInt(velYDisplay.value);
+        startVelX = parseFloat(velXDisplay.value);
+        startVelY = parseFloat(velYDisplay.value);
+        ball.velX = parseFloat(velXDisplay.value);
+        ball.velY = parseFloat(velYDisplay.value);
 
         // Draw ball at new position
         ball.draw();
         // Print out new data
         printData(null);
     }
+}
+
+// Set initial polar velocity
+function setVelPolar() {
+    // only allow changes when simulation is paused
+    if (isRunning == false) {
+        const speed = document.getElementById("speed").value;
+        const angle = document.getElementById("angle").value;
+        startVelX = Math.cos(rad(angle)) * speed;
+        startVelY = Math.sin(rad(angle)) * speed;
+        ball.velX = startVelX;
+        ball.velY = startVelY;
+    }
+
+    // Draw ball at new position
+    ball.draw();
+    // Print out new data
+    printData(null);
 }
 
 // Output all ball data
@@ -269,7 +326,31 @@ function printData(time) {
     angleDisplay.value = ball.angle;
     // If not time update is needed, the parameter is passed as null
     if (!(time == null)) {
-        timeDisplay.innerHTML = time;
+        timeDisplay.innerHTML = String(time).substring(0, 5);
     }
 }
 // ----------------------------------------------------------------------------------------------------
+
+
+// ---------------UTILITY FUNCTIONS------------------
+// Convert from degrees to radians
+function rad(arg) {
+    return arg / 180 * Math.PI;
+}
+// Convert from radians to degrees
+function deg(arg) {
+    return arg / Math.PI * 180;
+}
+// Altered arctan
+function atan(x, y) {
+    if (x < 0) {
+        if (y < 0) {
+            return -180 + deg(Math.atan(y / x));
+        } else {
+            return 180 + deg(Math.atan(y / x));
+        }
+    } else {
+        return deg(Math.atan(y / x));
+    }
+}
+// --------------------------------------------------
