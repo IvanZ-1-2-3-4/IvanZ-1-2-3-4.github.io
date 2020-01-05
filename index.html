@@ -13,34 +13,45 @@
 
 <body>
     <div class="container" style="display: inline-block;">
-        <canvas id="main-canvas" class="canvas b" width="1000px" height="500px"></canvas></br>
+        <canvas id="base-layer" class="base-layer" width="1000px" height="500px"></canvas>
+        <canvas id="layer1" class="canvas b layer1" width="1000px" height="500px"></canvas>
+        <canvas id="layer2" class="canvas b layer2" width="1000px" height="500px"></canvas>
+        <canvas id="grid-layer" class="canvas b grid-layer" width="1000px" height="500px"></canvas>
     </div>
     <div class="container" style="display: inline-block;">
+        <h3>Timer:</h3>
         <div id="time" class="time-display"></div></br>
-        Canvas Dimensions:</br>
-        Width:<input type="text" id="width" value="50"></br>
-        Height:<input id="height" type="text" value="25"></br>
+        <h3>Dimensions:</h3>
+        Width:<input type="text" id="width" value="50">m</br>
+        Height:<input id="height" type="text" value="25">m</br>
         <button id="set-dim" onclick="setDim()">Set Dimensions</button></br>
         </br>
-        Position:</br> 
-        x:<input type="text" id="posx"></br> 
-        y:<input type="text" id="posy"></br>
+        <h3>Position (drag and drop ball):</h3>
+        x:<input type="text" id="posx">m</br> 
+        y:<input type="text" id="posy">m</br>
         <button id="set-pos" onclick="setPos()">Set Position</button></br>
         </br>
-        Speed:</br> 
-        Magnitude:<input type="text" id="speed"></br> 
-        Angle:<input type="text" id="angle"></br>
+        <h3>Speed:</h3> 
+        Magnitude:<input type="text" id="speed">ms⁻¹</br> 
+        Angle:<input type="text" id="angle">°
+        <input type="range" min="-180" max="180" value="63.43" class="slider" id="angle-slider"></br>
         <button id="set-vel-polar" onclick="setVelPolar()">Set Velocity (polar)</button></br>
-        x-velocity:<input type="text" id="velx"></br> 
-        y-velocity:<input type="text" id="vely"></br>
+        x-velocity:<input type="text" id="velx">ms⁻¹</br> 
+        y-velocity:<input type="text" id="vely">ms⁻¹</br>
         <button id="set-vel-rect" onclick="setVelRect()">Set Velocity (rect.)</button></br>
         </br>
-        <input type="checkbox" id="trail" checked>Trail</br>
+        <input type="checkbox" id="trail">Show Trail</br>
+        <button id="clear-trail" onclick="clearTrail()">Clear Trail</button></br>
+        <input type="checkbox" id="vectors" checked>Show Velocity Vectors
     </div></br>
-    <button id="play" onclick="startClick()">Play</button>
-    <button id="pause">Pause</button>
+    <button id="play" onclick="startClick()"><img src="https://img.icons8.com/flat_round/64/000000/play.png"></button>
+    <button id="pause"><img src="https://img.icons8.com/flat_round/64/000000/pause--v1.png"></button>
+    <button id="reset" onclick="reset()"><img src="https://img.icons8.com/flat_round/64/000000/recurring-appointment.png"></button>
     <input type="checkbox" id="timer" checked>Start Timer
     <button id="reset-timer" onclick="resetTimer()">Reset Timer</button>
-    <button id="reset" onclick="reset()">RESET RESET RESET</button>
+    </br>
+    <p>
+        Each grid division represents 1 meter
+    </p>
 </body>
 </html>

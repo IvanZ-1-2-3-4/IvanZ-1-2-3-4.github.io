@@ -1,7 +1,24 @@
 .b {border: 1px solid black;}
 .canvas {
-    
+    /*background: url('image.jpg');*/
 }
+
+.base-layer {
+    position: relative; left: 0; top: 0; z-index: 0;
+}
+
+.grid-layer {
+    position: absolute; left: 8; top: 8; z-index: 2;
+}
+
+.layer1 {
+    position: absolute; left: 8; top: 8; z-index: 2;
+}
+
+.layer2 {
+    position: absolute; left: 8; top: 8; z-index: 3;
+}
+
 .container {
     display: inline-block;
     margin: 0px;
@@ -13,4 +30,12 @@
     font-size: 26px;
     color: rgb(238, 238, 238);
     background-color: rgb(56, 56, 56);
+}
+
+h3 {
+    margin: 0px;
+}
+
+input[type=text]{
+    width: 45px;
 }

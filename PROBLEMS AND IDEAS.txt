@@ -11,11 +11,15 @@ TO DO:
     
 -Change the baseline height to be so that the ball doesn't clip through walls✔
 -Have a timer✔
--Make denote apex
--Make rulers
--Validation for everything
+-Make denote apex ??? (do i really need to do this)
+-Multiple layers✔
+-Make grid✔
+-Have ball be draggable to change its position NO THIS IS FUCKED
+-Validation for everything✔
 -Remove any imprecisions in transitioning between play and pause, between one
-bit of simulation to the next
+bit of simulation to the next✔
+-Have a trail that works properly✔
+-GRAPHSx
 -Draw velocity vectors
--Have a trail that works properly
--Have ball be draggable to change its position
+-Sliders to change everything
+-try doing a "ball is thrown off a cliff at 15ms⁻¹ problem and fix the bullshit
