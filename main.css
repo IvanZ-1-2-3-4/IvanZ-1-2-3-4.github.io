@@ -36,6 +36,18 @@ h3 {
     margin: 0px;
 }
 
-input[type=text]{
+input[type=text] {
     width: 45px;
+}
+
+input[type=range] {
+    margin: 0;
+    display: none;
+}
+
+input[type=range]#angle-slider {
+    display: block;
+}
+
+.controls {
 }

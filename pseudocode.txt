@@ -1,0 +1,9 @@
+OUT = true
+loop for COUNT = 0 to INPUTS.length
+    if isNaN(inputs[i])
+        OUT = false
+
+if NOT OUT = true
+    output "Inputs needs to be numbers!"
+
+return OUT

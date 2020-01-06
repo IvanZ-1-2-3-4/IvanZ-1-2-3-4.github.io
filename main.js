@@ -37,7 +37,7 @@ const g = -9.81;
 // --------------------------------------------------
 
 
-// ------------HTML ELEMENT VARIABLES----------------
+// ------------------HTML ELEMENTS-------------------
 // Ball stats display
 let posXDisplay,
     posYDisplay,
@@ -116,7 +116,6 @@ let ball = {
 };
 
 
-
 $(document).ready(function() {
     // Draw ball at initial position
     ball.draw();
@@ -149,74 +148,72 @@ window.onload = function() {
 
 // -----------------------------------MAIN ANIMATION FUNCTION------------------------------------------
 function animate(timestamp) {
-    // If animation is not running, starTime will be set to null
-    if (!startTime) {
-        // Set start time
-        startTime = timestamp;
-        // Reset total time
-        totalTime = 0;
-    }
-    // Set time
-    const time = (timestamp - startTime) * 0.001;
-    // If ball has made impact with ground
-    let impact = false;
-
-    // Time at which the ball is supposed to hit the ground
-    const impactTime = (-startVelY - Math.sqrt(Math.pow(startVelY, 2) - 2*g*startPosY)) / g;
-
-    // Check if time > time at which ball is supposed to hit the ground
-    if (time > impactTime) {
-        ball.posRealY = 0;
-        isRunning = false;
-        impact = true;
-    } else {
-        // Update ball's position
-        ball.posRealY = startPosY + (startVelY*time) + (0.5*g*Math.pow(time, 2)); // s=ut+1/2at²
-        ball.posRealX = startPosX + (startVelX*time); // s=vt
-
-        // Update ball's velocity
-        ball.velX = startVelX;
-        ball.velY = startVelY + g*time;
-    }
-
-    // If the ball has hit the ground
-    if (impact == true) {
-        // Set timer time to time of impact
-        if (timerInput.checked == true) {
-            timerTime = startTimerTime + impactTime;
-            window.alert("ball has reached the ground at time " + sigfigs(timerTime, 4));
+        // If animation is not running, starTime will be set to null
+        if (!startTime) {
+            // Set start time
+            startTime = timestamp;
         }
-    } else {
-        // Increment timer time
-        if (timerInput.checked == true) {
-            timerTime = startTimerTime + time;
+        // Set time
+        const time = (timestamp - startTime) * 0.001;
+        // If ball has made impact with ground
+        let impact = false;
+
+        // Time at which the ball is supposed to hit the ground
+        const impactTime = (-startVelY - Math.sqrt(Math.pow(startVelY, 2) - 2*g*startPosY)) / g;
+
+        // Check if time > time at which ball is supposed to hit the ground
+        if (time > impactTime) {
+            ball.posRealY = 0;
+            isRunning = false;
+            impact = true;
+        } else {
+            // Update ball's position
+            ball.posRealY = startPosY + (startVelY*time) + (0.5*g*Math.pow(time, 2)); // s=ut+1/2at²
+            ball.posRealX = startPosX + (startVelX*time); // s=vt
+
+            // Update ball's velocity
+            ball.velX = startVelX;
+            ball.velY = startVelY + g*time;
         }
-    }
 
-    // Draw ball
-    ball.draw();
-    // Output ball stats
-    printData(timerTime);
+        // If the ball has hit the ground
+        if (impact == true) {
+            // Set timer time to time of impact
+            if (timerInput.checked == true) {
+                timerTime = startTimerTime + impactTime;
+                window.alert("ball has reached the ground at time " + sigfigs(timerTime, 4));
+            }
+        } else {
+            // Increment timer time
+            if (timerInput.checked == true) {
+                timerTime = startTimerTime + time;
+            }
+        }
 
-    // Continue or suspend the animation
-    if (isRunning == true) {
-        requestAnimationFrame(animate);
-    } else {
-        // Reset start time
-        startTime = null;
-        // Set starting timer time to time of pause
-        startTimerTime = timerTime;
-        // Set new start velocity and position
-        startVelX = ball.velX;
-        startVelY = ball.velY;
-        startPosX = ball.posRealX;
-        startPosY = ball.posRealY;
-    }
+        // Draw ball
+        ball.draw();
+        // Output ball stats
+        printData(timerTime);
 
-    // Pause the animation
-    $("#pause").click(function() {
-        isRunning = false;
-    });
+        // Continue or suspend the animation
+        if (isRunning == true) {
+            requestAnimationFrame(animate);
+        } else {
+            // Reset start time
+            startTime = null;
+            // Set starting timer time to time of pause
+            startTimerTime = timerTime;
+            // Set new start velocity and position
+            startVelX = ball.velX;
+            startVelY = ball.velY;
+            startPosX = ball.posRealX;
+            startPosY = ball.posRealY;
+        }
+
+        // Pause the animation
+        $("#pause").click(function() {
+            isRunning = false;
+        });
 }
 // ----------------------------------------------------------------------------------------------------
 
@@ -513,6 +510,7 @@ function arrow(x1, y1, x2, y2, context) {
     context.lineTo(x2, y2);
     context.lineTo(x2 - headLength * Math.cos(rad(angle - headAngle)), y2 - headLength * Math.sin(rad(angle - headAngle)));
     context.moveTo(x2, y2);
-    context.lineTo(x2 - headLength * Math.cos(rad(angle + headAngle)), y2 - headLength * Math.sin(rad(angle + headAngle)));        context.stroke();
+    context.lineTo(x2 - headLength * Math.cos(rad(angle + headAngle)), y2 - headLength * Math.sin(rad(angle + headAngle)));        
+    context.stroke();
 }
 // --------------------------------------------------

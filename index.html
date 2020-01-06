@@ -18,28 +18,35 @@
         <canvas id="layer2" class="canvas b layer2" width="1000px" height="500px"></canvas>
         <canvas id="grid-layer" class="canvas b grid-layer" width="1000px" height="500px"></canvas>
     </div>
-    <div class="container" style="display: inline-block;">
+    <div class="container controls" style="display: inline-block;">
         <h3>Timer:</h3>
         <div id="time" class="time-display"></div></br>
+        
         <h3>Dimensions:</h3>
         Width:<input type="text" id="width" value="50">m</br>
         Height:<input id="height" type="text" value="25">m</br>
         <button id="set-dim" onclick="setDim()">Set Dimensions</button></br>
         </br>
+
         <h3>Position (drag and drop ball):</h3>
         x:<input type="text" id="posx">m</br> 
         y:<input type="text" id="posy">m</br>
         <button id="set-pos" onclick="setPos()">Set Position</button></br>
         </br>
+
         <h3>Speed:</h3> 
         Magnitude:<input type="text" id="speed">ms⁻¹</br> 
+        <input type="range" min="-50" max="50" value="24.76" class="slider" id="speed-slider">
         Angle:<input type="text" id="angle">°
-        <input type="range" min="-180" max="180" value="63.43" class="slider" id="angle-slider"></br>
+        <input type="range" min="-180" max="180" value="63.43" class="slider" id="angle-slider">
         <button id="set-vel-polar" onclick="setVelPolar()">Set Velocity (polar)</button></br>
-        x-velocity:<input type="text" id="velx">ms⁻¹</br> 
+        x-velocity:<input type="text" id="velx">ms⁻¹</br>
+        <input type="range" min="25" max="25" value="11.07" class="slider" id="velx-slider">
         y-velocity:<input type="text" id="vely">ms⁻¹</br>
+        <input type="range" min="25" max="25" value="22.14" class="slider" id="vely-slider">
         <button id="set-vel-rect" onclick="setVelRect()">Set Velocity (rect.)</button></br>
         </br>
+
         <input type="checkbox" id="trail">Show Trail</br>
         <button id="clear-trail" onclick="clearTrail()">Clear Trail</button></br>
         <input type="checkbox" id="vectors" checked>Show Velocity Vectors
