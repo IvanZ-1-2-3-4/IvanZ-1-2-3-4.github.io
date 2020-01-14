@@ -1,14 +1,11 @@
 .b {border: 1px solid black;}
-.canvas {
-    /*background: url('image.jpg');*/
-}
 
 .base-layer {
     position: relative; left: 0; top: 0; z-index: 0;
 }
 
 .grid-layer {
-    position: absolute; left: 8; top: 8; z-index: 2;
+    position: absolute; left: 8; top: 8; z-index: 1;
 }
 
 .layer1 {
@@ -47,7 +44,27 @@ input[type=range] {
 
 input[type=range]#angle-slider {
     display: block;
+    margin: 0;
 }
 
-.controls {
+.graph-controls {
+    padding: 10px;
+}
+
+.graph-grid-container {
+    display: grid;
+    height: 100%;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 70%;
+}
+
+.animation-grid-container {
+}
+
+.graph-container {
+
+}
+
+.chart {
+
 }

@@ -22,6 +22,11 @@ let canvasWidthReal = 50,
 let startTime = null,
     // Is animation running
     isRunning = false,
+    // Is data for graph being collected
+    graphExists = true,
+    // Graph axes
+    graphX = "x",
+    graphY = "y",
     // Starting velocity
     startVelX = initVelX,
     startVelY = initVelY,
@@ -31,7 +36,41 @@ let startTime = null,
     // Timer time
     timerTime = 0,
     // Starting time value at start of animation
-    startTimerTime = 0;
+    startTimerTime = 0,
+    balls = [];
+    // Graph data
+    function Graph(graphX, graphY) {
+        this.type = "scatter";
+        this.data = {
+            datasets: [{
+                label: graphY + " against " + graphX,
+                data: [],
+                pointBackgroundColor: "rgba(0,0,0,1)"
+            }]
+        };
+        this.options = {
+            hover: {
+                animationDuration: 0
+            },
+            responsive:true,
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: graphY
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: graphX
+                    }
+                }]
+            }
+        };
+    }
+    let graphData = new Graph(graphX, graphY);
 // Gravity
 const g = -9.81;
 // --------------------------------------------------
@@ -117,10 +156,6 @@ let ball = {
 
 
 $(document).ready(function() {
-    // Draw ball at initial position
-    ball.draw();
-    // Draw grid
-    drawGrid();
     // Load all HTML elements once document is ready 
     posXDisplay = document.getElementById("posx");
     posYDisplay = document.getElementById("posy");
@@ -136,9 +171,14 @@ $(document).ready(function() {
 
     // Set slider handler functions
     angleSlider.oninput = angleSliderInput;
-
+    // Draw ball at initial position
+    ball.draw();
+    // Draw grid
+    drawGrid();
     // Print out initial data
     printData(0);
+    // Draw empty graph
+    drawGraph();
 });
 
 window.onload = function() {
@@ -148,72 +188,71 @@ window.onload = function() {
 
 // -----------------------------------MAIN ANIMATION FUNCTION------------------------------------------
 function animate(timestamp) {
-        // If animation is not running, starTime will be set to null
-        if (!startTime) {
-            // Set start time
-            startTime = timestamp;
+    // If animation is not running, starTime will be set to null
+    if (!startTime) {
+        // Set start time
+        startTime = timestamp;
+    }
+    // Set time
+    const time = (timestamp - startTime) * 0.001;
+    // If ball has made impact with ground
+    let impact = false;
+
+    // Time at which the ball is supposed to hit the ground
+    const impactTime = (-startVelY - Math.sqrt(Math.pow(startVelY, 2) - 2*g*startPosY)) / g;
+
+    // Check if time > time at which ball is supposed to hit the ground
+    if (time > impactTime) {
+        ball.posRealY = 0;
+        isRunning = false;
+        impact = true;
+
+        // Set timer time to time of impact
+        if (timerInput.checked == true) {
+            timerTime = startTimerTime + impactTime;
+            window.alert("ball has reached the ground at time " + sigfigs(timerTime, 4));
         }
-        // Set time
-        const time = (timestamp - startTime) * 0.001;
-        // If ball has made impact with ground
-        let impact = false;
+    } else {
+        // Update ball's position
+        ball.posRealY = startPosY + (startVelY*time) + (0.5*g*Math.pow(time, 2)); // s=ut+1/2at²
+        ball.posRealX = startPosX + (startVelX*time); // s=vt
 
-        // Time at which the ball is supposed to hit the ground
-        const impactTime = (-startVelY - Math.sqrt(Math.pow(startVelY, 2) - 2*g*startPosY)) / g;
+        // Update ball's velocity
+        ball.velX = startVelX;
+        ball.velY = startVelY + g*time;
 
-        // Check if time > time at which ball is supposed to hit the ground
-        if (time > impactTime) {
-            ball.posRealY = 0;
-            isRunning = false;
-            impact = true;
-        } else {
-            // Update ball's position
-            ball.posRealY = startPosY + (startVelY*time) + (0.5*g*Math.pow(time, 2)); // s=ut+1/2at²
-            ball.posRealX = startPosX + (startVelX*time); // s=vt
-
-            // Update ball's velocity
-            ball.velX = startVelX;
-            ball.velY = startVelY + g*time;
+        // Increment timer time
+        if (timerInput.checked == true) {
+            timerTime = startTimerTime + time;
         }
+    }
 
-        // If the ball has hit the ground
-        if (impact == true) {
-            // Set timer time to time of impact
-            if (timerInput.checked == true) {
-                timerTime = startTimerTime + impactTime;
-                window.alert("ball has reached the ground at time " + sigfigs(timerTime, 4));
-            }
-        } else {
-            // Increment timer time
-            if (timerInput.checked == true) {
-                timerTime = startTimerTime + time;
-            }
-        }
+    // Draw ball
+    ball.draw();
+    // Output ball stats
+    printData(timerTime);
+    // Collect data for graph
+    collectGraphData(timerTime);
 
-        // Draw ball
-        ball.draw();
-        // Output ball stats
-        printData(timerTime);
+    // Continue or suspend the animation
+    if (isRunning == true) {
+        requestAnimationFrame(animate);
+    } else {
+        // Reset start time
+        startTime = null;
+        // Set starting timer time to time of pause
+        startTimerTime = timerTime;
+        // Set new start velocity and position
+        startVelX = ball.velX;
+        startVelY = ball.velY;
+        startPosX = ball.posRealX;
+        startPosY = ball.posRealY;
+    }
 
-        // Continue or suspend the animation
-        if (isRunning == true) {
-            requestAnimationFrame(animate);
-        } else {
-            // Reset start time
-            startTime = null;
-            // Set starting timer time to time of pause
-            startTimerTime = timerTime;
-            // Set new start velocity and position
-            startVelX = ball.velX;
-            startVelY = ball.velY;
-            startPosX = ball.posRealX;
-            startPosY = ball.posRealY;
-        }
-
-        // Pause the animation
-        $("#pause").click(function() {
-            isRunning = false;
-        });
+    // Pause the animation
+    $("#pause").click(function() {
+        isRunning = false;
+    });
 }
 // ----------------------------------------------------------------------------------------------------
 
@@ -395,7 +434,7 @@ function setVelRect() {
 
 // Set initial polar velocity
 function setVelPolar() {
-    // only allow changes when simulation is paused
+    // Only allow changes when simulation is paused
     if (isRunning == false) {
         const speedIn = speedDisplay.value;
         const angleIn = angleDisplay.value;
@@ -431,6 +470,96 @@ function printData(time, slider = "") {
 function angleSliderInput() {
     angleDisplay.value = this.value;
     setVelPolar();
+}
+
+// Hide or show vectors once checkbox is clicked
+function showVectors() {
+    // Only allow changes when simulation is paused
+    if (isRunning == false) {
+        ball.draw();
+    }
+}
+
+// Start graph data collection
+function startGraph() {
+    // Ensures graph axes cannot be changed during animation
+    graphX = document.getElementById("x-axis").value;
+    graphY = document.getElementById("y-axis").value;
+    graphExists = true;
+    graphData = new Graph(graphX, graphY);
+    graphData.data.datasets[0].data = [];
+}
+
+// Collect graph data
+function collectGraphData(time) {
+    let newDataPoint = {
+        x: null,
+        y: null
+    };
+
+    switch (graphX) {
+        case "time":
+            newDataPoint.x = time;
+            break;
+        case "x-position":
+            newDataPoint.x = ball.posRealX;
+            break;
+        case "y-position":
+            newDataPoint.x = ball.posRealY;
+            break;
+        case "x-velocity":
+            newDataPoint.x = ball.velX;
+            break;
+        case "y-velocity":
+            newDataPoint.x = ball.velY;
+            break;
+        case "speed":
+            newDataPoint.x = ball.speed;
+            break;
+        case "angle":
+            newDataPoint.x = ball.angle;
+            break;
+    }
+    
+    switch (graphY) {
+        case "time":
+            newDataPoint.y = time;
+            break;
+        case "x-position":
+            newDataPoint.y = ball.posRealX;
+            break;
+        case "y-position":
+            newDataPoint.y = ball.posRealY;
+            break;
+        case "x-velocity":
+            newDataPoint.y = ball.velX;
+            break;
+        case "y-velocity":
+            newDataPoint.y = ball.velY;
+            break;
+        case "speed":
+            newDataPoint.y = ball.speed;
+            break;
+        case "angle":
+            newDataPoint.y = ball.angle;
+            break;
+    }
+
+    // Add new data point to data array
+    graphData.data.datasets[0].data.push(newDataPoint);
+}
+
+// Draw graph
+function drawGraph() {
+    const context = document.getElementById("chart");
+    let chart = new Chart(context, graphData);
+}
+
+function resetGraph() {
+    // Delete graph
+    document.getElementById("graph-container").innerHTML = "";
+    document.getElementById("graph-container").innerHTML = "<canvas id=\"chart\" class=\"chart\"></canvas>";
+    graphData = null;
 }
 // ----------------------------------------------------------------------------------------------------
 

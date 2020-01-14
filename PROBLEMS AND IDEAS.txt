@@ -14,12 +14,24 @@ TO DO:
 -Make denote apex ??? (do i really need to do this)
 -Multiple layers✔
 -Make grid✔
--Have ball be draggable to change its position NO THIS IS FUCKED
+-Have ball be draggable to change its position✔
 -Validation for everything✔
 -Remove any imprecisions in transitioning between play and pause, between one
 bit of simulation to the next✔
 -Have a trail that works properly✔
--GRAPHSx
--Draw velocity vectors
+-Draw velocity vectors✔
+-GRAPHS
+    -make the graph fit the div✔
+    -make it graph over time✔
+    -make sure all✔
+    -LABELS DON'T WORK?????
+    -make the controls make sense
+    -make the controls not look like shit
+    -make the graph not look like shit
+    
+-Multiple balls (for complexity)
+    -Display multiple balls
+    -Change shit for individual balls
 -Sliders to change everything
 -try doing a "ball is thrown off a cliff at 15ms⁻¹ problem and fix the bullshit
+-Don't forget to make vectors disabled by default
