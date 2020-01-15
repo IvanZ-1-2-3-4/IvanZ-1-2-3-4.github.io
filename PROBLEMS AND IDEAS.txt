@@ -32,6 +32,9 @@ bit of simulation to the next✔
 -Multiple balls (for complexity)
     -Display multiple balls
     -Change shit for individual balls
+        -Add button for each new ball
+    -COLOR AND SHIT
+-Remove redundant impact variable
 -Sliders to change everything
 -try doing a "ball is thrown off a cliff at 15ms⁻¹ problem and fix the bullshit
 -Don't forget to make vectors disabled by default

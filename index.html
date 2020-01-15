@@ -10,17 +10,27 @@
 <script src="jquery.min.js"></script>
 <script src="matter.min.js"></script>
 <script src="Chart.min.js"></script>
+<script src="presentation.js"></script>
 <script src="main.js"></script>
 
 <body>
     <div class="animation-grid-container">
         <div class="container" style="display: inline-block;">
             <canvas id="base-layer" class="base-layer" width="1000px" height="500px"></canvas>
+            <canvas id="grid-layer" class="canvas b grid-layer" width="1000px" height="500px"></canvas>
             <canvas id="layer1" class="canvas b layer1" width="1000px" height="500px"></canvas>
             <canvas id="layer2" class="canvas b layer2" width="1000px" height="500px"></canvas>
-            <canvas id="grid-layer" class="canvas b grid-layer" width="1000px" height="500px"></canvas>
         </div>
         <div class="container controls" style="display: inline-block;">
+            <div id="ball-selector">
+                Choose ball:
+                <button id="ball-selector-1" style="display: inline-block; background-color: green;">1</button>
+                <button id="ball-selector-2" style="display: none;">2</button>
+                <button id="ball-selector-3" style="display: none;">3</button>
+                <button id="ball-selector-4" style="display: none;">4</button>
+                <button id="ball-selector-5" style="display: none;">5</button>
+            </div>
+            </br>
             <h3>Timer:</h3>
             <div id="time" class="time-display"></div></br>
             
@@ -58,6 +68,7 @@
     <input type="checkbox" id="trail">Show Trail
     <button id="clear-trail" onclick="clearTrail()">Clear Trail</button>
     <input type="checkbox" id="vectors" onclick="showVectors()" checked>Show Velocity Vectors
+    <button id="new-ball" onclick="newBall()">Create New Ball</button>
     </br></br>
     <div class="graph-grid-container">
         <div id="graph-container" class="b graph-container">
