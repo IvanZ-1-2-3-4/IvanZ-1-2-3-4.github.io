@@ -15,11 +15,11 @@
 
 <body>
     <div class="animation-grid-container">
-        <div class="container" style="display: inline-block;">
-            <canvas id="base-layer" class="base-layer" width="1000px" height="500px"></canvas>
-            <canvas id="grid-layer" class="canvas b grid-layer" width="1000px" height="500px"></canvas>
-            <canvas id="layer1" class="canvas b layer1" width="1000px" height="500px"></canvas>
-            <canvas id="layer2" class="canvas b layer2" width="1000px" height="500px"></canvas>
+        <div id="canvas-container" class="container" style="display: inline-block;">
+            <canvas id="base-layer" style="position: relative; left: 0; top: 0; z-index: 0;" width="1000px" height="500px"></canvas>
+            <canvas id="grid-layer" class="b" style="position: absolute; left: 8; top: 8; z-index: 1;" width="1000px" height="500px"></canvas>
+            <canvas id="trail-layer-1" class="b" style="position: absolute; left: 8; top: 8; z-index: 2;" width="1000px" height="500px"></canvas>
+            <canvas id="layer1" class="b" style="position: absolute; left: 8; top: 8; z-index: 3;" width="1000px" height="500px"></canvas>
         </div>
         <div class="container controls" style="display: inline-block;">
             <div id="ball-selector">

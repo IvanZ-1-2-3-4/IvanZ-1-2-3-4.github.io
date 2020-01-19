@@ -31,6 +31,8 @@ bit of simulation to the next✔
     
 -Multiple balls (for complexity)
     -Display multiple balls
+    -Buttons to select ball✔
+    -NEW layers
     -Change shit for individual balls
         -Add button for each new ball
     -COLOR AND SHIT
