@@ -30,12 +30,16 @@ bit of simulation to the next✔
     -make the graph not look like shit
     
 -Multiple balls (for complexity)
-    -Display multiple balls
+    -Display multiple balls✔
     -Buttons to select ball✔
-    -NEW layers
-    -Change shit for individual balls
-        -Add button for each new ball
-    -COLOR AND SHIT
+    -NEW layers✔
+    -Change shit for individual balls✔
+        -Add button for each new ball✔
+    -COLOR AND SHIT✔
+    -delete balls✔
+    -UNLIMITED BALLS✔
+    -dragging balls
+-Make buttons make sense
 -Remove redundant impact variable
 -Sliders to change everything
 -try doing a "ball is thrown off a cliff at 15ms⁻¹ problem and fix the bullshit

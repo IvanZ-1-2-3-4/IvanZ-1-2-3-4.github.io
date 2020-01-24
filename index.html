@@ -18,17 +18,13 @@
         <div id="canvas-container" class="container" style="display: inline-block;">
             <canvas id="base-layer" style="position: relative; left: 0; top: 0; z-index: 0;" width="1000px" height="500px"></canvas>
             <canvas id="grid-layer" class="b" style="position: absolute; left: 8; top: 8; z-index: 1;" width="1000px" height="500px"></canvas>
-            <canvas id="trail-layer-1" class="b" style="position: absolute; left: 8; top: 8; z-index: 2;" width="1000px" height="500px"></canvas>
-            <canvas id="layer1" class="b" style="position: absolute; left: 8; top: 8; z-index: 3;" width="1000px" height="500px"></canvas>
+            <canvas id="trail-layer-0" class="b" style="position: absolute; left: 8; top: 8; z-index: 2;" width="1000px" height="500px"></canvas>
+            <canvas id="layer0" class="b" style="position: absolute; left: 8; top: 8; z-index: 3;" width="1000px" height="500px"></canvas>
         </div>
         <div class="container controls" style="display: inline-block;">
             <div id="ball-selector">
-                Choose ball:
-                <button id="ball-selector-1" style="display: inline-block; background-color: green;">1</button>
-                <button id="ball-selector-2" style="display: none;">2</button>
-                <button id="ball-selector-3" style="display: none;">3</button>
-                <button id="ball-selector-4" style="display: none;">4</button>
-                <button id="ball-selector-5" style="display: none;">5</button>
+                Select ball:
+                <button id="ball-selector-0" style="display: inline-block; background-color: black; border-color: green;" onclick="ballSelect(0)">&nbsp</button>
             </div>
             </br>
             <h3>Timer:</h3>
@@ -69,12 +65,13 @@
     <button id="clear-trail" onclick="clearTrail()">Clear Trail</button>
     <input type="checkbox" id="vectors" onclick="showVectors()" checked>Show Velocity Vectors
     <button id="new-ball" onclick="newBall()">Create New Ball</button>
+    <button id="new-ball" onclick="deleteBall()">Delete ball</button>
     </br></br>
     <div class="graph-grid-container">
-        <div id="graph-container" class="b graph-container">
+        <div id="graph-container" class="graph-container">
             <canvas id="chart" class="chart"></canvas>
         </div>
-        <div class="b graph-controls">
+        <div class="graph-controls">
             <h3>Graph axes</h3>
             X-Axis:</br>
             <select id="x-axis">

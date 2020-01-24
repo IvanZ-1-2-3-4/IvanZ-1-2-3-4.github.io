@@ -18,6 +18,100 @@ let canvasWidthReal = 50,
 // --------------------------------------------------
 
 
+// ---------------BALL OBJECT------------------------
+function Ball(color, id) {
+    this.id = id;
+    // Real position of the ball in meters
+    this.posRealX = initPosX;
+    this.posRealY = initPosY;
+    // Real velocity of the ball in meters per second
+    this.velX = initVelX;
+    this.velY = initVelY;
+    // Starting position at beginning of animation
+    this.startPosX = initPosX;
+    this.startPosY = initPosY;
+    // Starting velocity at beginning of animation
+    this.startVelX = initVelX;
+    this.startVelY = initVelY;
+    this.radius = 10;
+    // Numerical representation of color as integer between 0 and 16^6 - 1
+    this.numColor = color;
+    this.show = true;
+    // If the ball is on the ground
+    this.landed = false;
+    Object.defineProperties(this, {
+        "posX": {
+            "get": function() {
+                return (this.posRealX * canvasWidth / canvasWidthReal) + this.radius;
+            }
+        },
+        "posY": {
+            "get": function() {
+                return (canvasHeight - (this.posRealY * canvasHeight / canvasHeightReal)) - this.radius;
+            }
+        },
+        "speed": {
+            "get": function() {
+                return Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2)); // c=√a²+b²
+            }
+        },
+        "angle": {
+            "get": function() {
+                return atan(this.velX, this.velY); // θ=arctan(Vy/Vx)
+            }
+        },
+        "color": {
+            "get": function() {
+                // Convert decimal number to html color value
+                let out = this.numColor.toString(16);
+                while (out.length < 6) {
+                    // Prepend required number of zeroes to value if it isn't 6 digits long
+                    out = "0" + out;
+                }
+                return "#" + out;
+            }
+        }
+    });
+    this.draw = function() {
+        const trailLayer = document.getElementById("trail-layer-" + this.id);
+        const trailContext = trailLayer.getContext("2d");
+        const ballLayer = document.getElementById("layer" + this.id);
+        const ballContext = ballLayer.getContext("2d");
+
+        // Cover previous frame
+        ballContext.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        // Draw new frame
+        ballContext.beginPath();
+        ballContext.arc(this.posX, this.posY, this.radius, 0, 2 * Math.PI);
+        ballContext.fillStyle = this.color;
+        ballContext.fill();
+
+        // Draw velocity vectors
+        if (document.getElementById("vectors").checked == true) {
+            // Scale factor for arrow
+            const scale = 5;
+            // x-velocity vector
+            arrow(this.posX, this.posY, this.posX + (this.velX * scale), this.posY, ballContext, this.color);
+            // y-velocity vector
+            arrow(this.posX, this.posY, this.posX, this.posY - (this.velY * scale), ballContext, this.color);
+            // net velocity vector
+            arrow(this.posX, this.posY, this.posX + Math.cos(rad(this.angle))*this.speed*scale, this.posY - Math.sin(rad(this.angle))*this.speed*scale, ballContext, this.color);
+        }
+
+        // Draw trail
+        if (document.getElementById("trail").checked == true) {
+            // Ensures no trail is drawn when ball is manually dragged
+            if (isRunning == true) {
+                trailContext.fillStyle = this.color;
+                trailContext.fillRect(this.posX, this.posY, 2, 2);
+            }
+        }
+    };
+}
+// --------------------------------------------------
+
+
 // -----------ANIMATION UTILITY VARIABLES------------
 // Time at the start of an animation
 let startTime = null,
@@ -32,8 +126,25 @@ let startTime = null,
     timerTime = 0,
     // Starting time value at start of animation
     startTimerTime = 0,
+    // Stores ball objects
     balls = [],
-    currentBallIndex = 0;
+    // ID of currently used ball
+    currentBallID = 0;
+    // Get index in array of ball with the selected id
+    currentBallIndex = function() {
+        let out;
+        // Used to prevent errors as balls are not initialised prior to the function being called
+        try {
+            for (let i = 0; i <= balls.length; i++) {
+                if (balls[i].id == currentBallID) {
+                    out = i;
+                }
+            }
+        } catch(err) {}
+        finally {
+            return out;
+        }
+    };
     // Graph data
     function Graph(graphX, graphY) {
         this.type = "scatter";
@@ -67,7 +178,9 @@ let startTime = null,
         };
     }
     // Initial graph
-    let graphData = new Graph(graphX, graphY);
+    //let graphData = new Graph(graphX, graphY);
+    // Create first ball
+    balls[0] = new Ball(0, 0);
 // Gravity
 const g = -9.81;
 // --------------------------------------------------
@@ -90,84 +203,6 @@ let posXDisplay,
     // Slider inputs
     angleSlider;
 // --------------------------------------------------
-
-function Ball(color, id) {
-    this.id = id;
-    // Real position of the ball in meters
-    this.posRealX = initPosX;
-    this.posRealY = initPosY;
-    // Real velocity of the ball in meters per second
-    this.velX = initVelX;
-    this.velY = initVelY;
-    // Starting position at beginning of animation
-    this.startPosX = initPosX;
-    this.startPosY = initPosY;
-    // Starting velocity at beginning of animation
-    this.startVelX = initVelX;
-    this.startVelY = initVelY;
-    this.radius = 10;
-    this.color = color;
-    this.show = true;
-    Object.defineProperties(this, {
-        "posX": {
-            "get": function() {
-                return (this.posRealX * canvasWidth / canvasWidthReal) + this.radius;
-            }
-        },
-        "posY": {
-            "get": function() {
-                return (canvasHeight - (this.posRealY * canvasHeight / canvasHeightReal)) - this.radius;
-            }
-        },
-        "speed": {
-            "get": function() {
-                return Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2)); // c=√a²+b²
-            }
-        },
-        "angle": {
-            "get": function() {
-                return atan(this.velX, this.velY); // θ=arctan(Vy/Vx)
-            }
-        }
-    });
-    this.draw = function() {
-        const trailLayer = document.getElementById("trail-layer-" + this.id);
-        const trailContext = trailLayer.getContext("2d");
-        const ballLayer = document.getElementById("layer" + this.id);
-        const ballContext = ballLayer.getContext("2d");
-
-        // Cover previous frame
-        ballContext.clearRect(0, 0, canvasWidth, canvasHeight);
-
-        // Draw new frame
-        ballContext.beginPath();
-        ballContext.arc(this.posX, this.posY, this.radius, 0, 2 * Math.PI);
-        ballContext.fillStyle = this.color;
-        ballContext.fill();
-
-        // Draw velocity vectors
-        if (document.getElementById("vectors").checked == true) {
-            // Scale factor for arrow
-            const scale = 5;
-            // x-velocity vector
-            arrow(this.posX, this.posY, this.posX + (this.velX * scale), this.posY, ballContext);
-            // y-velocity vector
-            arrow(this.posX, this.posY, this.posX, this.posY - (this.velY * scale), ballContext);
-            // net velocity vector
-            arrow(this.posX, this.posY, this.posX + Math.cos(rad(this.angle))*this.speed*scale, this.posY - Math.sin(rad(this.angle))*this.speed*scale, ballContext);
-        }
-
-        // Draw trail
-        if (document.getElementById("trail").checked == true) {
-            // Ensures no trail is drawn when ball is manually dragged
-            if (isRunning == true) {
-                trailContext.fillRect(this.posX, this.posY, 2, 2);
-            }
-        }
-    };
-}
-// Create first ball
-balls[0] = new Ball("black", 1);
 //#endregion
 
 $(document).ready(function() {
@@ -193,7 +228,7 @@ $(document).ready(function() {
     // Print out initial data
     printData(0);
     // Draw empty graph
-    drawGraph();
+    //drawGraph();
 });
 
 window.onload = function() {
@@ -211,47 +246,49 @@ function animate(timestamp) {
     // Set time
     const time = (timestamp - startTime) * 0.001;
     for (let i = 0; i <= balls.length - 1; i++) {
-
-        // If balls has made impact with ground
-        let impact = false; // THIS IS REDUNDANT
-
         // Time at which the balls is supposed to hit the ground
         const impactTime = (-balls[i].startVelY - Math.sqrt(Math.pow(balls[i].startVelY, 2) - 2*g*balls[i].startPosY)) / g;
-
-        // Check if time > time at which ball is supposed to hit the ground
-        if (time > impactTime) {
-            balls[i].posRealY = 0;
-            isRunning = false;
-            impact = true;
-            // Set timer time to time of impact
-            if (timerInput.checked == true) {
-                timerTime = startTimerTime + impactTime;
-                window.alert("ball " + i + " has reached the ground at time " + sigfigs(timerTime, 4));
-            }
-        } else {
-            // Update balls's position
-            balls[i].posRealY = balls[i].startPosY + (balls[i].startVelY*time) + (0.5*g*Math.pow(time, 2)); // s=ut+1/2at²
-            balls[i].posRealX = balls[i].startPosX + (balls[i].startVelX*time); // s=vt
-
-            // Update balls's velocity
-            balls[i].velX = balls[i].startVelX;
-            balls[i].velY = balls[i].startVelY + g*time;
-
-            // Increment timer time
-            if (timerInput.checked == true) {
-                timerTime = startTimerTime + time;
-            }
+        
+        // If ball is set to travel away from ground, it is no longer landed
+        if (balls[i].landed && (impactTime != 0)) {
+            balls[i].landed = false;
         }
 
-        // Draw ball
-        balls[i].draw();
-        // Output ball stats
-        //console.log(balls)
-        //console.log(currentBallIndex)
-        printData(timerTime);
-        // Collect data for graph
-        collectGraphData(timerTime);
+        if (!balls[i].landed) {
+            // Check if time > time at which ball is supposed to hit the ground
+            if (time > impactTime) {
+                balls[i].posRealY = 0;
+                balls[i].landed = true;
+                isRunning = false;
+                impact = true;
+                // Set timer time to time of impact
+                if (timerInput.checked == true) {
+                    timerTime = startTimerTime + impactTime;
+                    window.alert("ball " + i + " has reached the ground at time " + sigfigs(timerTime, 4));
+                }
+            } else {
+                // Update balls's position
+                balls[i].posRealY = balls[i].startPosY + (balls[i].startVelY*time) + (0.5*g*Math.pow(time, 2)); // s=ut+1/2at²
+                balls[i].posRealX = balls[i].startPosX + (balls[i].startVelX*time); // s=vt
+
+                // Update balls's velocity
+                balls[i].velX = balls[i].startVelX;
+                balls[i].velY = balls[i].startVelY + g*time;
+
+                // Increment timer time
+                if (timerInput.checked == true) {
+                    timerTime = startTimerTime + time;
+                }
+            }
+
+            // Collect data for graph
+            //collectGraphData(timerTime);
+        }
     }
+    // Draw balls
+    drawAll();
+    // Output ball stats
+    printData(timerTime);
 
     // Continue or suspend the animation
     if (isRunning == true) {
@@ -286,27 +323,73 @@ function startClick() {
 }
 
 function newBall() {
-    // Allow a maximum of 5 balls
-    if (balls.length == 5) {
-        window.alert("Maximum number of balls reached!");
-    } else {
-        // CHANGE COLOR NEEDS CHANGE!!!!!!!
-        // Create new ball
-        currentBallIndex = currentBallIndex + 1;
-        balls.push(new Ball("black", currentBallIndex + 1));
-    }    
-    // Add a button 
-    document.getElementById("ball-selector-" + (currentBallIndex + 1)).style.display = "inline-block";
-    // Add a canvas for trail
-    $("#canvas-container").append(
-        "<canvas id=\"trail-layer-" + (currentBallIndex + 1) + "\" class=\"b\" style=\"position: absolute; left: 8; top: 8; z-index: " + ((currentBallIndex + 1) * 2) + ";\" width=\"1000px\" height=\"500px\"></canvas>"
-    );
-    // Add a canvas for ball
-    $("#canvas-container").append(
-        "<canvas id=\"layer" + (currentBallIndex + 1) + "\" class=\"b\" style=\"position: absolute; left: 8; top: 8; z-index: " + ((currentBallIndex + 1) * 2 + 1) + ";\" width=\"1000px\" height=\"500px\"></canvas>"
-    );
-    // Draw new ball
-    balls[currentBallIndex].draw();
+    // Only allow changes if simulation is paused
+    if (!isRunning) {
+                // Index of new ball in the array
+        // Find maximum id of balls and add 1
+        let newBallID = 0;
+        for (let i = 0; i <= balls.length - 1; i++) {
+            if (balls[i].id > newBallID) {
+                newBallID = balls[i].id;
+            }
+        }
+        newBallID++;
+
+        // Allow a maximum of 10 balls
+        if (balls.length == 10) {
+            window.alert("Maximum number of balls reached!");
+        } else {
+            // Create new ball
+            balls.push(new Ball(randomColor(), newBallID));
+
+            // Add a button
+            $("#ball-selector").append(
+                "<button id=\"ball-selector-" + newBallID + "\" style=\"display: inline-block; background-color: " + balls[balls.length - 1].color + "\" onclick=\"ballSelect(" + newBallID + ")\">&nbsp</button>"
+            );
+
+            // Add a canvas for trail
+            $("#canvas-container").append(
+                "<canvas id=\"trail-layer-" + newBallID + "\" class=\"b\" style=\"position: absolute; left: 8; top: 8; z-index: " + (newBallID * 2) + ";\" width=\"1000px\" height=\"500px\"></canvas>"
+            );
+            // Add a canvas for ball
+            $("#canvas-container").append(
+                "<canvas id=\"layer" + newBallID + "\" class=\"b\" style=\"position: absolute; left: 8; top: 8; z-index: " + (newBallID * 2 + 1) + ";\" width=\"1000px\" height=\"500px\"></canvas>"
+            );
+        
+            // Draw new ball
+            drawAll();
+
+            // Set current ball ID
+            if (balls.length == 1) {
+                currentBallID = balls[0].id;
+            }
+        }    
+    }
+}
+
+// Delete current ball
+function deleteBall() {
+    // Only allow changes if simulation is paused
+    if (!isRunning) {
+        console.log(currentBallIndex())
+        for (let i = currentBallIndex(); i <= balls.length - 2; i++) {
+            // Replace each ball with next one, shifting them down by one
+            balls[i] = balls[i + 1];
+        }
+        // Remove redundant element at the end of array
+        balls.pop();
+        // Delete canvas
+        $("#trail-layer-" + currentBallID).remove();
+        $("#layer" + currentBallID).remove();
+        // Delete button
+        $("#ball-selector-" + currentBallID).remove();
+        // Draw without ball
+        drawAll();
+        // Change to next ball
+        if (balls.length !== 0) {
+            currentBallID = balls[0].id;
+        }
+    }
 }
 
 // Reset state of simulation to default state
@@ -314,10 +397,10 @@ function reset() {
     // Reset all animation variables
     isRunning = false;
     startTime = null;
-    setAll("starVelX", initVelX);
-    setAll("starVelY", initVelY);
-    setAll("starPosX", initPosX);
-    setAll("starPosY", initPosY);
+    setAll("startVelX", initVelX);
+    setAll("startVelY", initVelY);
+    setAll("startPosX", initPosX);
+    setAll("startPosY", initPosY);
     // Reset ball position
     setAll("posRealX", initPosX);
     setAll("posRealY", initPosY);
@@ -326,7 +409,6 @@ function reset() {
     setAll("velY", initVelY);
     resetTimer();
     clearTrail();
-
     // Draw ball at new position
     drawAll();
     // Print out new data
@@ -334,9 +416,11 @@ function reset() {
 }
 
 function clearTrail() {
-    const canvas = document.getElementById("trail-layer");
-    const context = canvas.getContext("2d");
-    context.clearRect(0, 0, canvasWidth, canvasHeight);
+    for (let i = 0; i <= balls.length - 1; i++) {
+        const canvas = document.getElementById("trail-layer-" + balls[i].id);
+        const context = canvas.getContext("2d");
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
+    }
 }
 
 function resetTimer() {
@@ -377,8 +461,8 @@ function setDim() {
         let widthIn = document.getElementById("width").value;
         let heightIn = document.getElementById("height").value;
         if (validateFloat([widthIn, heightIn])) {
-            canvasWidthReal = widthIn;
-            canvasHeightReal = heightIn;
+            canvasWidthReal = parseFloat(widthIn);
+            canvasHeightReal = parseFloat(heightIn);
 
             // Convert real width and height to pixel values
             canvasWidth = Math.sqrt(canvasArea * canvasWidthReal / canvasHeightReal);
@@ -411,13 +495,13 @@ function setPos() {
         const xIn = posXDisplay.value;
         const yIn = posYDisplay.value;
         if (validateFloat([xIn, yIn])) {
-            balls[currentBallIndex].posRealX = xIn;
-            balls[currentBallIndex].posRealY = yIn;
-            balls[currentBallIndex].startPosX = xIn;
-            balls[currentBallIndex].startPosY = yIn;
+            balls[currentBallIndex()].posRealX = parseFloat(xIn);
+            balls[currentBallIndex()].posRealY = parseFloat(yIn);
+            balls[currentBallIndex()].startPosX = parseFloat(xIn);
+            balls[currentBallIndex()].startPosY = parseFloat(yIn);
 
             // Draw ball at new position
-            balls[currentBallIndex].draw();
+            balls[currentBallIndex()].draw();
             // Print out new data
             printData(null);
         }
@@ -431,13 +515,13 @@ function setVelRect() {
         const xIn = velXDisplay.value;
         const yIn = velYDisplay.value;
         if (validateFloat([xIn, yIn])) {
-            balls[currentBallIndex].startVelX = xIn;
-            balls[currentBallIndex].startVelY = yIn;
-            balls[currentBallIndex].velX = xIn;
-            balls[currentBallIndex].velY = yIn;
+            balls[currentBallIndex()].startVelX = parseFloat(xIn);
+            balls[currentBallIndex()].startVelY = parseFloat(yIn);
+            balls[currentBallIndex()].velX = parseFloat(xIn);
+            balls[currentBallIndex()].velY = parseFloat(yIn);
 
             // Draw ball at new position
-            balls[currentBallIndex].draw();
+            balls[currentBallIndex()].draw();
             // Print out new data
             printData(null);
         }
@@ -451,13 +535,13 @@ function setVelPolar() {
         const speedIn = speedDisplay.value;
         const angleIn = angleDisplay.value;
         if (validateFloat([speedIn]) && validateAngle([angleIn])) {
-            balls[currentBallIndex].startVelX = Math.cos(rad(angleIn)) * speedIn;
-            balls[currentBallIndex].startVelY = Math.sin(rad(angleIn)) * speedIn;
-            balls[currentBallIndex].velX = startVelX;
-            balls[currentBallIndex].velY = startVelY;
+            balls[currentBallIndex()].startVelX = Math.cos(rad(angleIn)) * speedIn;
+            balls[currentBallIndex()].startVelY = Math.sin(rad(angleIn)) * speedIn;
+            balls[currentBallIndex()].velX = balls[currentBallIndex()].startVelX;
+            balls[currentBallIndex()].velY = balls[currentBallIndex()].startVelY;
 
             // Draw ball at new position
-            balls[currentBallIndex].draw();
+            balls[currentBallIndex()].draw();
             // Print out new data
             printData(null);
         }
@@ -466,12 +550,13 @@ function setVelPolar() {
 
 // Output all ball data
 function printData(time, slider = "") {
-    posXDisplay.value = sigfigs(balls[currentBallIndex].posRealX, 4);
-    posYDisplay.value = sigfigs(balls[currentBallIndex].posRealY, 4);
-    velXDisplay.value = sigfigs(balls[currentBallIndex].velX, 4);
-    velYDisplay.value = sigfigs(balls[currentBallIndex].velY, 4);
-    speedDisplay.value = sigfigs(balls[currentBallIndex].speed, 4);
-    angleDisplay.value = sigfigs(balls[currentBallIndex].angle, 4);
+    posXDisplay.value = sigfigs(balls[currentBallIndex()].posRealX, 4);
+    posYDisplay.value = sigfigs(balls[currentBallIndex()].posRealY, 4);
+    velXDisplay.value = sigfigs(balls[currentBallIndex()].velX, 4);
+    velYDisplay.value = sigfigs(balls[currentBallIndex()].velY, 4);
+    speedDisplay.value = sigfigs(balls[currentBallIndex()].speed, 4);
+    angleDisplay.value = sigfigs(balls[currentBallIndex()].angle, 4);
+    angleSlider.value = sigfigs(balls[currentBallIndex()].angle, 4);
     // If no time update is needed, the parameter is passed as null
     if (time !== null) {
         timeDisplay.innerHTML = sigfigs(time, 4) + "s";
@@ -488,13 +573,13 @@ function angleSliderInput() {
 function showVectors() {
     // Only allow changes when simulation is paused
     if (isRunning == false) {
-        balls[currentBallIndex].draw();
+        balls[currentBallIndex()].draw();
     }
 }
 //#endregion ----------------------------------------------------------------------------------------------------
 
 
-//#region ----------------------------------------GRAPHS------------------------------------------------------
+//#region ---------------------------------------GRAPHS-------------------------------------------------------
 // Start graph data collection
 function startGraph() {
     // Ensures graph axes cannot be changed during animation
@@ -582,12 +667,19 @@ function resetGraph() {
 
 //#region -----------------------------------DRAG AND DROP BALL-----------------------------------------------
 function drag(event) {
+    // Only allow dragging if simulation is paused
     if (isRunning == false) {
-        const canvas = document.getElementById("layer1");
+        const canvas = document.getElementById("layer" + currentBallID);
         if ((event.clientX < (balls[0].posX + balls[0].radius + canvasMargin)) && (event.clientX > (balls[0].posX - balls[0].radius + canvasMargin))) {
             if ((event.clientY < (balls[0].posY + balls[0].radius + canvasMargin)) && (event.clientY > (balls[0].posY - balls[0].radius + canvasMargin))) {
+                // Save old radius of the ball
+                let oldRadius = balls[currentBallIndex()].radius;
+                // Make ball bigger when dragged
+                balls[currentBallIndex()].radius = oldRadius + (oldRadius / 4);
                 canvas.addEventListener("mousemove", mousemove);
-                canvas.addEventListener("mouseup", mouseup);
+                canvas.addEventListener("mouseup", function(event) {
+                    mouseup(event, oldRadius);
+                });
             }
         }
     }
@@ -605,15 +697,18 @@ function mousemove(event) {
     printData(null);
 }
 
-function mouseup(event) {
-    const canvas = document.getElementById("layer1");
+function mouseup(event, oldRadius) {
+    const canvas = document.getElementById("layer" + currentBallID);
     canvas.removeEventListener("mousemove", mousemove);
     canvas.removeEventListener("mouseUp", mouseup);
+    // Reset ball to old radius
+    balls[currentBallIndex()].radius = oldRadius;
+    balls[currentBallIndex()].draw();
 }
 //#endregion ----------------------------------------------------------------------------------------------------
 
 
-//#region ---------------UTILITY FUNCTIONS------------------
+//#region -----------------------------------UTILITY FUNCTIONS------------------------------------------------
 // Convert from degrees to radians
 function rad(arg) {
     return arg / 180 * Math.PI;
@@ -669,21 +764,21 @@ function validateAngle(input) {
 }
 
 // Draw line from (x1, y1) to (x2, y2)
-function line(x1, y1, x2, y2, context, color = "black", width = 1) {
+function line(x1, y1, x2, y2, context, color = "black") {
     context.beginPath();
     context.strokeStyle = color;
-    context.lineWidth = width;
     context.moveTo(x1, y1);
     context.lineTo(x2, y2);
     context.stroke();
 }
 
 // Draw arrow from (x1, y1) to (x2, y2)
-function arrow(x1, y1, x2, y2, context) {
+function arrow(x1, y1, x2, y2, context, color) {
     context.beginPath();
     const headLength = 10;
     const headAngle = 30;
     const angle = deg(Math.atan2(y2 - y1, x2 - x1));
+    context.strokeStyle = color;
     context.moveTo(x1, y1);
     context.lineTo(x2, y2);
     // Rotate headAngle degrees, draw line with length headLength
@@ -696,7 +791,7 @@ function arrow(x1, y1, x2, y2, context) {
 
 // Draw all balls
 function drawAll() {
-    for (let i = 0; i < balls.length - 1; i++) {
+    for (let i = 0; i <= balls.length - 1; i++) {
         balls[i].draw();
     }
 }
@@ -715,37 +810,45 @@ function setAll(prop, val, dependent = false /* If the value assigned is a prope
         }
     }
 }
-//#endregion --------------------------------------------------
+
+// Give random color which is sufficiently different from current ball colors
+function randomColor() {
+    // How far the colors must be apart from each other
+    const similarityThreshold = 100000;
+    // If appropriate color has been found
+    let done = true;
+    // New random color as integer between 0 and 16^4 - 1
+    let color = Math.floor(Math.random() * (Math.pow(16, 6) - 1));
+
+    // Check if any ball's color is similar to selected color
+    for (let i = 0; i <= balls.length - 1; i++) {
+        if (Math.abs(color - balls[i].numColor) < similarityThreshold) {
+            done = false;
+        }
+    }
+
+    if (done) {
+        return color;
+    } else {
+        return randomColor();
+    }
+}
+//#endregion ----------------------------------------------------------------------------------------------------
 
 
 //#region -----------------------------------BALL CHANGE HANDLERS---------------------------------------------
+// Select new ball ID
+function ballSelect(selectedID) {
+    currentBallID = selectedID;
+    allOffOneOn(selectedID);
+}
+
+// Highlight selected button
 function allOffOneOn(on) {
-    for (let i = 1; i <= 5; i++) {
-        document.getElementById("ball-selector-" + i).style.backgroundColor = null;
+    for (let i = 0; i <= balls.length - 1; i++) {
+        document.getElementById("ball-selector-" + balls[i].id).style.borderColor = null;
     }
-    document.getElementById("ball-selector-" + on).style.backgroundColor = "green";
+    document.getElementById("ball-selector-" + on).style.borderColor = "green";
     printData();
 }
-$(document).ready(function() {
-    $("#ball-selector-1").click(function() {
-        currentBallIndex = 0;
-        allOffOneOn(1);
-    });
-    $("#ball-selector-2").click(function() {
-        currentBallIndex = 1;
-        allOffOneOn(2);
-    });
-    $("#ball-selector-3").click(function() {
-        currentBallIndex = 2;
-        allOffOneOn(3);
-    });
-    $("#ball-selector-4").click(function() {
-        currentBallIndex = 3;
-        allOffOneOn(4);
-    });
-    $("#ball-selector-5").click(function() {
-        currentBallIndex = 4;
-        allOffOneOn(5);
-    });
-});
 //#endregion ----------------------------------------------------------------------------------------------------
