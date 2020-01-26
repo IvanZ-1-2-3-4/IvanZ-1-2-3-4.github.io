@@ -20,15 +20,6 @@ TO DO:
 bit of simulation to the next✔
 -Have a trail that works properly✔
 -Draw velocity vectors✔
--GRAPHS
-    -make the graph fit the div✔
-    -make it graph over time✔
-    -make sure all✔
-    -LABELS DON'T WORK?????
-    -make the controls make sense
-    -make the controls not look like shit
-    -make the graph not look like shit
-    
 -Multiple balls (for complexity)
     -Display multiple balls✔
     -Buttons to select ball✔
@@ -38,9 +29,19 @@ bit of simulation to the next✔
     -COLOR AND SHIT✔
     -delete balls✔
     -UNLIMITED BALLS✔
-    -dragging balls
--Make buttons make sense
--Remove redundant impact variable
+    -dragging balls✔
+    -timer
+-GRAPHS
+    -make the graph fit the div✔
+    -make it graph over time✔
+    -make sure all✔
+    -LABELS DON'T WORK?????
+    -make the controls make sense
+    -make the controls not look like shit
+    -make the graph not look like shit
+-Make buttons pretty
+-Remove redundant impact variable✔
+-So it changes for different screen sizes
 -Sliders to change everything
 -try doing a "ball is thrown off a cliff at 15ms⁻¹ problem and fix the bullshit
 -Don't forget to make vectors disabled by default

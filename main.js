@@ -1,9 +1,9 @@
 //#region vars
 // ---------------INIT STATE-------------------------
-const initVelX = 15,//50/(Math.sqrt(50*9.81)/9.81)/2,
-    initVelY = 0,//Math.sqrt(50*9.81),
+const initVelX = 50/(Math.sqrt(50*9.81)/9.81)/2,
+    initVelY = Math.sqrt(50*9.81),
     initPosX = 0,
-    initPosY = 15;
+    initPosY = 0;
 // --------------------------------------------------
 
 
@@ -42,11 +42,13 @@ function Ball(color, id) {
     Object.defineProperties(this, {
         "posX": {
             "get": function() {
+                // Convert meter value of X position to pixel value
                 return (this.posRealX * canvasWidth / canvasWidthReal) + this.radius;
             }
         },
         "posY": {
             "get": function() {
+                // Convert meter value of Y position to pixel value
                 return (canvasHeight - (this.posRealY * canvasHeight / canvasHeightReal)) - this.radius;
             }
         },
@@ -236,7 +238,7 @@ window.onload = function() {
 };
 
 
-// -----------------------------------MAIN ANIMATION FUNCTION------------------------------------------
+//#region -----------------------------------MAIN ANIMATION FUNCTION------------------------------------------
 function animate(timestamp) {
     // If animation is not running, starTime will be set to null
     if (!startTime) {
@@ -254,6 +256,7 @@ function animate(timestamp) {
             balls[i].landed = false;
         }
 
+        // Only animate ball if it isn't landed
         if (!balls[i].landed) {
             // Check if time > time at which ball is supposed to hit the ground
             if (time > impactTime) {
@@ -264,7 +267,8 @@ function animate(timestamp) {
                 // Set timer time to time of impact
                 if (timerInput.checked == true) {
                     timerTime = startTimerTime + impactTime;
-                    window.alert("ball " + i + " has reached the ground at time " + sigfigs(timerTime, 4));
+                    $("#dialog").dialog();
+                    //window.alert("ball " + i + " has reached the ground at time " + sigfigs(timerTime, 4));
                 }
             } else {
                 // Update balls's position
@@ -310,7 +314,7 @@ function animate(timestamp) {
         isRunning = false;
     });
 }
-// ----------------------------------------------------------------------------------------------------
+//#endregion ----------------------------------------------------------------------------------------------------
 
 
 //#region ----------------------------BUTTON CLICK HANDLERS AND OTHER FUNCTIONS-------------------------------
@@ -669,15 +673,16 @@ function resetGraph() {
 function drag(event) {
     // Only allow dragging if simulation is paused
     if (isRunning == false) {
-        const canvas = document.getElementById("layer" + currentBallID);
-        if ((event.clientX < (balls[0].posX + balls[0].radius + canvasMargin)) && (event.clientX > (balls[0].posX - balls[0].radius + canvasMargin))) {
-            if ((event.clientY < (balls[0].posY + balls[0].radius + canvasMargin)) && (event.clientY > (balls[0].posY - balls[0].radius + canvasMargin))) {
+        if ((event.clientX < (balls[currentBallIndex()].posX + balls[currentBallIndex()].radius + canvasMargin)) && (event.clientX > (balls[currentBallIndex()].posX - balls[currentBallIndex()].radius + canvasMargin))) {
+            if ((event.clientY < (balls[currentBallIndex()].posY + balls[currentBallIndex()].radius + canvasMargin)) && (event.clientY > (balls[currentBallIndex()].posY - balls[currentBallIndex()].radius + canvasMargin))) {
                 // Save old radius of the ball
                 let oldRadius = balls[currentBallIndex()].radius;
                 // Make ball bigger when dragged
                 balls[currentBallIndex()].radius = oldRadius + (oldRadius / 4);
-                canvas.addEventListener("mousemove", mousemove);
-                canvas.addEventListener("mouseup", function(event) {
+                // Execute mousemove when clicked
+                mousemove(event);
+                document.body.addEventListener("mousemove", mousemove);
+                document.body.addEventListener("mouseup", function(event) {
                     mouseup(event, oldRadius);
                 });
             }
@@ -687,23 +692,22 @@ function drag(event) {
 
 function mousemove(event) {
     // Convert mouse position to real ball position
-    const newX = (event.clientX - balls[0].radius - canvasMargin) * canvasWidthReal / canvasWidth;
-    const newY = (canvasHeight - (event.clientY + balls[0].radius - canvasMargin)) * canvasHeightReal / canvasHeight;
-    balls[0].posRealX = newX;
-    balls[0].posRealY = newY;
-    startPosX = newX;
-    startPosY = newY;
-    balls[0].draw();
+    const newX = (event.clientX - balls[currentBallIndex()].radius - canvasMargin) * canvasWidthReal / canvasWidth;
+    const newY = (canvasHeight - (event.clientY + balls[currentBallIndex()].radius - canvasMargin)) * canvasHeightReal / canvasHeight;
+    balls[currentBallIndex()].posRealX = newX;
+    balls[currentBallIndex()].posRealY = newY;
+    balls[currentBallIndex()].startPosX = newX;
+    balls[currentBallIndex()].startPosY = newY;
+    drawAll();
     printData(null);
 }
 
 function mouseup(event, oldRadius) {
-    const canvas = document.getElementById("layer" + currentBallID);
-    canvas.removeEventListener("mousemove", mousemove);
-    canvas.removeEventListener("mouseUp", mouseup);
+    document.body.removeEventListener("mousemove", mousemove);
+    document.body.removeEventListener("mouseUp", mouseup);
     // Reset ball to old radius
     balls[currentBallIndex()].radius = oldRadius;
-    balls[currentBallIndex()].draw();
+    drawAll();
 }
 //#endregion ----------------------------------------------------------------------------------------------------
 
