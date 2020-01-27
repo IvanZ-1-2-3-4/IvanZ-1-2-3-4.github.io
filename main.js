@@ -74,7 +74,7 @@ function Ball(color, id) {
             }
         }
     });
-    this.draw = function() {
+    this.draw = function(radius = this.radius) {
         const trailLayer = document.getElementById("trail-layer-" + this.id);
         const trailContext = trailLayer.getContext("2d");
         const ballLayer = document.getElementById("layer" + this.id);
@@ -85,7 +85,7 @@ function Ball(color, id) {
 
         // Draw new frame
         ballContext.beginPath();
-        ballContext.arc(this.posX, this.posY, this.radius, 0, 2 * Math.PI);
+        ballContext.arc(this.posX, this.posY, radius, 0, 2 * Math.PI);
         ballContext.fillStyle = this.color;
         ballContext.fill();
 
@@ -180,7 +180,7 @@ let startTime = null,
         };
     }
     // Initial graph
-    //let graphData = new Graph(graphX, graphY);
+    let graphData = new Graph(graphX, graphY);
     // Create first ball
     balls[0] = new Ball(0, 0);
 // Gravity
@@ -585,11 +585,15 @@ function showVectors() {
 // Start graph data collection
 function startGraph() {
     // Ensures graph axes cannot be changed during animation
-    graphX = document.getElementById("x-axis").value;
-    graphY = document.getElementById("y-axis").value;
-    graphExists = true;
-    graphData = new Graph(graphX, graphY);
-    graphData.data.datasets[0].data = [];
+    if (!isRunning) {
+        graphX = document.getElementById("x-axis").value;
+        graphY = document.getElementById("y-axis").value;
+        graphExists = true;
+        // Create graph
+        graphData = new Graph(graphX, graphY);
+        // Reset graph data
+        graphData.data.datasets[0].data = [];
+    }
 }
 
 // Collect graph data
@@ -673,16 +677,10 @@ function drag(event) {
     if (isRunning == false) {
         if ((event.clientX < (balls[currentBallIndex()].posX + balls[currentBallIndex()].radius + canvasMargin)) && (event.clientX > (balls[currentBallIndex()].posX - balls[currentBallIndex()].radius + canvasMargin))) {
             if ((event.clientY < (balls[currentBallIndex()].posY + balls[currentBallIndex()].radius + canvasMargin)) && (event.clientY > (balls[currentBallIndex()].posY - balls[currentBallIndex()].radius + canvasMargin))) {
-                // Save old radius of the ball
-                let oldRadius = balls[currentBallIndex()].radius;
-                // Make ball bigger when dragged
-                balls[currentBallIndex()].radius = oldRadius + (oldRadius / 4);
                 // Execute mousemove when clicked
                 mousemove(event);
                 document.body.addEventListener("mousemove", mousemove);
-                document.body.addEventListener("mouseup", function(event) {
-                    mouseup(event, oldRadius);
-                });
+                document.body.addEventListener("mouseup", mouseup);
             }
         }
     }
@@ -696,15 +694,13 @@ function mousemove(event) {
     balls[currentBallIndex()].posRealY = newY;
     balls[currentBallIndex()].startPosX = newX;
     balls[currentBallIndex()].startPosY = newY;
-    drawAll();
+    balls[currentBallIndex()].draw(balls[currentBallIndex()].radius + (balls[currentBallIndex()].radius / 4));
     printData(null);
 }
 
-function mouseup(event, oldRadius) {
+function mouseup(event) {
     document.body.removeEventListener("mousemove", mousemove);
-    document.body.removeEventListener("mouseUp", mouseup);
-    // Reset ball to old radius
-    balls[currentBallIndex()].radius = oldRadius;
+    document.body.removeEventListener("mouseup", mouseup);
     drawAll();
 }
 //#endregion ----------------------------------------------------------------------------------------------------
