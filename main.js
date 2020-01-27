@@ -267,8 +267,7 @@ function animate(timestamp) {
                 // Set timer time to time of impact
                 if (timerInput.checked == true) {
                     timerTime = startTimerTime + impactTime;
-                    $("#dialog").dialog();
-                    //window.alert("ball " + i + " has reached the ground at time " + sigfigs(timerTime, 4));
+                    window.alert("ball " + i + " has reached the ground at time " + sigfigs(timerTime, 4));
                 }
             } else {
                 // Update balls's position
