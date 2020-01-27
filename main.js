@@ -1,9 +1,9 @@
 //#region vars
 // ---------------INIT STATE-------------------------
-const initVelX = 50/(Math.sqrt(50*9.81)/9.81)/2,
-    initVelY = Math.sqrt(50*9.81),
+const initVelX = 10,//50/(Math.sqrt(50*9.81)/9.81)/2,
+    initVelY = 0,//Math.sqrt(50*9.81),
     initPosX = 0,
-    initPosY = 0;
+    initPosY = 10;
 // --------------------------------------------------
 
 
@@ -124,14 +124,14 @@ let startTime = null,
     // Graph axes
     graphX = "x",
     graphY = "y",
-    // Timer time
-    timerTime = 0,
-    // Starting time value at start of animation
-    startTimerTime = 0,
     // Stores ball objects
     balls = [],
     // ID of currently used ball
     currentBallID = 0;
+    // Timer time
+    timerTime = 0;
+    // Starting time value at start of animation
+    startTimerTime = 0;
     // Get index in array of ball with the selected id
     currentBallIndex = function() {
         let out;
@@ -207,6 +207,7 @@ let posXDisplay,
 // --------------------------------------------------
 //#endregion
 
+// #region init functions
 $(document).ready(function() {
     // Load all HTML elements once document is ready 
     posXDisplay = document.getElementById("posx");
@@ -236,7 +237,7 @@ $(document).ready(function() {
 window.onload = function() {
     document.body.addEventListener("mousedown", drag);
 };
-
+// #endregion
 
 //#region -----------------------------------MAIN ANIMATION FUNCTION------------------------------------------
 function animate(timestamp) {
@@ -320,9 +321,7 @@ function animate(timestamp) {
 function startClick() {
     // Start animation
     isRunning = true;
-    requestAnimationFrame(function(timestamp) {
-        animate(timestamp);
-    });
+    requestAnimationFrame(animate);
 }
 
 function newBall() {
@@ -852,6 +851,6 @@ function allOffOneOn(on) {
         document.getElementById("ball-selector-" + balls[i].id).style.borderColor = null;
     }
     document.getElementById("ball-selector-" + on).style.borderColor = "green";
-    printData();
+    printData(timerTime);
 }
 //#endregion ----------------------------------------------------------------------------------------------------

@@ -30,7 +30,7 @@ bit of simulation to the next✔
     -delete balls✔
     -UNLIMITED BALLS✔
     -dragging balls✔
-    -timer
+    -timer✔
 -GRAPHS
     -make the graph fit the div✔
     -make it graph over time✔
