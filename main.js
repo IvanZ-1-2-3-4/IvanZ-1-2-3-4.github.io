@@ -1,4 +1,4 @@
-//#region vars
+// #region vars
 // ---------------INIT STATE-------------------------
 const initVelX = 10,//50/(Math.sqrt(50*9.81)/9.81)/2,
     initVelY = 0,//Math.sqrt(50*9.81),
@@ -19,6 +19,8 @@ let canvasWidthReal = 50,
 
 
 // ---------------BALL OBJECT------------------------
+// Stores ball objects
+let balls = [];
 function Ball(color, id) {
     this.id = id;
     // Real position of the ball in meters
@@ -37,19 +39,19 @@ function Ball(color, id) {
     // Numerical representation of color as integer between 0 and 16^6 - 1
     this.numColor = color;
     this.show = true;
-    // If the ball is on the ground
-    this.landed = false;
     Object.defineProperties(this, {
         "posX": {
             "get": function() {
                 // Convert meter value of X position to pixel value
-                return (this.posRealX * canvasWidth / canvasWidthReal) + this.radius;
+                return (this.posRealX * canvasWidth / canvasWidthReal) + this.radius; // radius added on to prevent the ball from
+                                                                                      // clipping into the walls
             }
         },
         "posY": {
             "get": function() {
                 // Convert meter value of Y position to pixel value
-                return (canvasHeight - (this.posRealY * canvasHeight / canvasHeightReal)) - this.radius;
+                return (canvasHeight - (this.posRealY * canvasHeight / canvasHeightReal)) - this.radius;// radius subtracted off to prevent
+                                                                                                        // the ball from clipping into the floor
             }
         },
         "speed": {
@@ -72,18 +74,43 @@ function Ball(color, id) {
                 }
                 return "#" + out;
             }
+        },
+        "landed": {
+            "get": function() {
+                // Solve height (posY) = ut + 1/2gt² for t, giving the time after which the ball will make impact with ground
+                const impactTime = (-this.startVelY - Math.sqrt(Math.pow(this.startVelY, 2) - 2*g*this.startPosY)) / g;
+                if (impactTime > 0) {
+                    // If impact time is greater than zero, the ball is still above the ground, meaning it's not landed
+                    return false;
+                } else {
+                    // Otherwise, it has landed
+                    return true;
+                }
+            }
         }
     });
     this.draw = function(radius = this.radius) {
+        // Trail canvas
         const trailLayer = document.getElementById("trail-layer-" + this.id);
         const trailContext = trailLayer.getContext("2d");
+        // Ball canvas
         const ballLayer = document.getElementById("layer" + this.id);
         const ballContext = ballLayer.getContext("2d");
 
         // Cover previous frame
         ballContext.clearRect(0, 0, canvasWidth, canvasHeight);
 
+        // Draw outline if ball being drawn is selected
+        if (this.id == currentBallID) {
+            // draws circle
+            ballContext.beginPath();
+            ballContext.arc(this.posX, this.posY, radius + 2, 0, 2 * Math.PI);
+            ballContext.fillStyle = "green";
+            ballContext.fill(); 
+        }
+
         // Draw new frame
+        // Draw circle
         ballContext.beginPath();
         ballContext.arc(this.posX, this.posY, radius, 0, 2 * Math.PI);
         ballContext.fillStyle = this.color;
@@ -94,11 +121,22 @@ function Ball(color, id) {
             // Scale factor for arrow
             const scale = 5;
             // x-velocity vector
-            arrow(this.posX, this.posY, this.posX + (this.velX * scale), this.posY, ballContext, this.color);
+            arrow(this.posX, this.posY,
+                this.posX + (this.velX * scale), // arrow length proportional to velX
+                this.posY, ballContext, this.color
+            );
             // y-velocity vector
-            arrow(this.posX, this.posY, this.posX, this.posY - (this.velY * scale), ballContext, this.color);
+            arrow(this.posX, this.posY, this.posX, 
+                this.posY - (this.velY * scale), // arrow length proportional to velX
+                ballContext, this.color
+            );
             // net velocity vector
-            arrow(this.posX, this.posY, this.posX + Math.cos(rad(this.angle))*this.speed*scale, this.posY - Math.sin(rad(this.angle))*this.speed*scale, ballContext, this.color);
+            arrow(
+                this.posX, this.posY, 
+                this.posX + Math.cos(rad(this.angle))*this.speed*scale, // trig used to calculate x component
+                this.posY - Math.sin(rad(this.angle))*this.speed*scale, // trig used to calculate t component
+                ballContext, this.color
+            );
         }
 
         // Draw trail
@@ -111,6 +149,8 @@ function Ball(color, id) {
         }
     };
 }
+// Create first ball
+balls[0] = new Ball(0, 0, 0);
 // --------------------------------------------------
 
 
@@ -120,12 +160,10 @@ let startTime = null,
     // Is animation running
     isRunning = false,
     // Is data for graph being collected
-    graphExists = true,
+    graphExists = false,
     // Graph axes
     graphX = "x",
     graphY = "y",
-    // Stores ball objects
-    balls = [],
     // ID of currently used ball
     currentBallID = 0;
     // Timer time
@@ -133,12 +171,12 @@ let startTime = null,
     // Starting time value at start of animation
     startTimerTime = 0;
     // Get index in array of ball with the selected id
-    currentBallIndex = function() {
+    currentBallIndex = function(id = currentBallID) {
         let out;
         // Used to prevent errors as balls are not initialised prior to the function being called
         try {
             for (let i = 0; i <= balls.length; i++) {
-                if (balls[i].id == currentBallID) {
+                if (balls[i].id == id) {
                     out = i;
                 }
             }
@@ -147,42 +185,46 @@ let startTime = null,
             return out;
         }
     };
+    // ID of ball for which the graph is collecting data
+    let graphBallID;
+    // Data for the graph
+    let graphData = [];
     // Graph data
-    function Graph(graphX, graphY) {
-        this.type = "scatter";
-        this.data = {
-            datasets: [{
-                label: graphY + " against " + graphX,
-                data: [],
-                pointBackgroundColor: "rgba(0,0,0,1)"
-            }]
-        };
-        this.options = {
-            hover: {
-                animationDuration: 0
-            },
-            responsive:true,
-            maintainAspectRatio: false,
-            scales: {
-                yAxes: [{
-                    scaleLabel: {
-                        display: true,
-                        labelString: graphY
-                    }
-                }],
-                xAxes: [{
-                    scaleLabel: {
-                        display: true,
-                        labelString: graphX
-                    }
+    function Graph(graphX, graphY, label, data) {
+        return {
+            type: "scatter",
+            data: {
+                datasets: [{
+                    label: label,
+                    data: data,
+                    pointBackgroundColor: "rgba(0,0,0,1)"
                 }]
+            },
+            options: {
+                hover: {
+                    animationDuration: 0
+                },
+                responsive:true,
+                maintainAspectRatio: false,
+                scales: {
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: graphY
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: graphX
+                        }
+                    }]
+                }
             }
         };
     }
     // Initial graph
-    let graphData = new Graph(graphX, graphY);
-    // Create first ball
-    balls[0] = new Ball(0, 0);
+    let graph = new Graph(graphX, graphY);
 // Gravity
 const g = -9.81;
 // --------------------------------------------------
@@ -231,44 +273,41 @@ $(document).ready(function() {
     // Print out initial data
     printData(0);
     // Draw empty graph
-    //drawGraph();
+    drawGraph();
 });
 
 window.onload = function() {
-    document.body.addEventListener("mousedown", drag);
+    document.body.addEventListener("mousedown", dragBall);
 };
 // #endregion
 
-//#region -----------------------------------MAIN ANIMATION FUNCTION------------------------------------------
+// #region -----------------------------------MAIN ANIMATION FUNCTION------------------------------------------
 function animate(timestamp) {
     // If animation is not running, starTime will be set to null
     if (!startTime) {
-        // Set start time
+        // Set start time for each press of play button
         startTime = timestamp;
     }
     // Set time
-    const time = (timestamp - startTime) * 0.001;
+    const time = (timestamp - startTime) * 0.001; // factor of 0.001 to convert milliseconds to seconds
     for (let i = 0; i <= balls.length - 1; i++) {
-        // Time at which the balls is supposed to hit the ground
+        // Time at which the balls is supposed to hit the ground,
+        // solving using quadratic formula s = startPosY + startVelY*impactTime + 1/2*g*impactTime²
         const impactTime = (-balls[i].startVelY - Math.sqrt(Math.pow(balls[i].startVelY, 2) - 2*g*balls[i].startPosY)) / g;
-        
-        // If ball is set to travel away from ground, it is no longer landed
-        if (balls[i].landed && (impactTime != 0)) {
-            balls[i].landed = false;
-        }
 
         // Only animate ball if it isn't landed
         if (!balls[i].landed) {
             // Check if time > time at which ball is supposed to hit the ground
             if (time > impactTime) {
+                // Ensure ball is "sitting" on ground
                 balls[i].posRealY = 0;
-                balls[i].landed = true;
+                balls[i].startPosY = 0;
+                // Pause simulation
                 isRunning = false;
-                impact = true;
                 // Set timer time to time of impact
                 if (timerInput.checked == true) {
                     timerTime = startTimerTime + impactTime;
-                    window.alert("ball " + i + " has reached the ground at time " + sigfigs(timerTime, 4));
+                    window.alert("projectile " + i + " has reached the ground at time " + sigfigs(timerTime, 4));
                 }
             } else {
                 // Update balls's position
@@ -276,18 +315,18 @@ function animate(timestamp) {
                 balls[i].posRealX = balls[i].startPosX + (balls[i].startVelX*time); // s=vt
 
                 // Update balls's velocity
-                balls[i].velX = balls[i].startVelX;
-                balls[i].velY = balls[i].startVelY + g*time;
-
-                // Increment timer time
-                if (timerInput.checked == true) {
-                    timerTime = startTimerTime + time;
-                }
+                balls[i].velX = balls[i].startVelX; // x velocity doesn't change
+                balls[i].velY = balls[i].startVelY + g*time; // v=u+at
             }
-
-            // Collect data for graph
-            //collectGraphData(timerTime);
         }
+    }
+    // Increment timer time
+    if (timerInput.checked == true) {
+        timerTime = startTimerTime + time;
+    }
+    // Collect data for graph
+    if (graphExists) {
+        collectGraphData(timerTime, graph.ballID);
     }
     // Draw balls
     drawAll();
@@ -309,7 +348,7 @@ function animate(timestamp) {
         setAll("startPosY", "posRealY", true);
     }
 
-    // Pause the animation
+    // Jquery event handler - Pause the animation
     $("#pause").click(function() {
         isRunning = false;
     });
@@ -317,17 +356,28 @@ function animate(timestamp) {
 //#endregion ----------------------------------------------------------------------------------------------------
 
 
-//#region ----------------------------BUTTON CLICK HANDLERS AND OTHER FUNCTIONS-------------------------------
+// #region ----------------------------BUTTON CLICK HANDLERS AND OTHER FUNCTIONS-------------------------------
 function startClick() {
-    // Start animation
-    isRunning = true;
-    requestAnimationFrame(animate);
+    // Only if remaining unlanded balls exist
+    let allLanded = true;
+    for (let i = 0; i <= balls.length - 1; i++) {
+        if (!balls[i].landed) {
+            allLanded = false;
+        }
+    }
+    if (!allLanded) {
+        // Start animation
+        isRunning = true;
+        requestAnimationFrame(animate);
+    } else {
+        window.alert("All balls are landed, animation cannot run!");
+    }
 }
 
 function newBall() {
     // Only allow changes if simulation is paused
     if (!isRunning) {
-                // Index of new ball in the array
+        // Index of new ball in the array
         // Find maximum id of balls and add 1
         let newBallID = 0;
         for (let i = 0; i <= balls.length - 1; i++) {
@@ -346,18 +396,38 @@ function newBall() {
 
             // Add a button
             $("#ball-selector").append(
-                "<button id=\"ball-selector-" + newBallID + "\" style=\"display: inline-block; background-color: " + balls[balls.length - 1].color + "\" onclick=\"ballSelect(" + newBallID + ")\">&nbsp</button>"
+                "<button id=\"ball-selector-" + 
+                newBallID + 
+                "\" style=\"display: inline-block; background-color: " + 
+                balls[balls.length - 1].color + 
+                "\" onclick=\"ballSelect(" + 
+                newBallID + 
+                ")\">&nbsp</button>"
             );
-
+            // Add a select option to graph ball select
+            $("#ball-graph-select").append(
+                '<option id="ball-graph-select-option-' + newBallID + '" style="background-color: ' + 
+                balls[balls.length - 1].color + 
+                ';" value="' + 
+                newBallID + 
+                '"></option>'
+            );
             // Add a canvas for trail
             $("#canvas-container").append(
-                "<canvas id=\"trail-layer-" + newBallID + "\" class=\"b\" style=\"position: absolute; left: 8; top: 8; z-index: " + (newBallID * 2) + ";\" width=\"1000px\" height=\"500px\"></canvas>"
+                "<canvas id=\"trail-layer-" + 
+                newBallID + 
+                "\" class=\"b\" style=\"position: absolute; left: 8; top: 8; z-index: " + 
+                (newBallID * 2) + 
+                ";\" width=\"1000px\" height=\"500px\"></canvas>"
             );
             // Add a canvas for ball
             $("#canvas-container").append(
-                "<canvas id=\"layer" + newBallID + "\" class=\"b\" style=\"position: absolute; left: 8; top: 8; z-index: " + (newBallID * 2 + 1) + ";\" width=\"1000px\" height=\"500px\"></canvas>"
+                "<canvas id=\"layer" + 
+                newBallID + 
+                "\" class=\"b\" style=\"position: absolute; left: 8; top: 8; z-index: " + 
+                (newBallID * 2 + 1) + 
+                ";\" width=\"1000px\" height=\"500px\"></canvas>"
             );
-        
             // Draw new ball
             drawAll();
 
@@ -365,7 +435,7 @@ function newBall() {
             if (balls.length == 1) {
                 currentBallID = balls[0].id;
             }
-        }    
+        }
     }
 }
 
@@ -373,7 +443,6 @@ function newBall() {
 function deleteBall() {
     // Only allow changes if simulation is paused
     if (!isRunning) {
-        console.log(currentBallIndex())
         for (let i = currentBallIndex(); i <= balls.length - 2; i++) {
             // Replace each ball with next one, shifting them down by one
             balls[i] = balls[i + 1];
@@ -385,6 +454,8 @@ function deleteBall() {
         $("#layer" + currentBallID).remove();
         // Delete button
         $("#ball-selector-" + currentBallID).remove();
+        // Delete graph selection
+        $("#ball-graph-select-option-" + currentBallID).remove();
         // Draw without ball
         drawAll();
         // Change to next ball
@@ -409,6 +480,8 @@ function reset() {
     // Reset ball velocity
     setAll("velX", initVelX);
     setAll("velY", initVelY);
+    // Set all to unlanded
+    setAll("landed", false);
     resetTimer();
     clearTrail();
     // Draw ball at new position
@@ -471,10 +544,12 @@ function setDim() {
             canvasHeight = Math.sqrt(canvasArea * canvasHeightReal / canvasWidthReal);
 
             // Set canvas attributes to updated values
-            $("#trail-layer").attr("width", canvasWidth);
-            $("#trail-layer").attr("height", canvasHeight);
-            $("#layer1").attr("width", canvasWidth);
-            $("#layer1").attr("height", canvasHeight);  
+            for (let i = 0; i <= balls.length - 1; i++) {
+                $("#trail-layer-" + i).attr("width", canvasWidth);
+                $("#trail-layer-" + i).attr("height", canvasHeight);
+                $("#layer" + i).attr("width", canvasWidth);
+                $("#layer" + i).attr("height", canvasHeight);  
+            }
             $("#grid-layer").attr("width", canvasWidth);
             $("#grid-layer").attr("height", canvasHeight);
             $("#base-layer").attr("width", canvasWidth);
@@ -497,11 +572,15 @@ function setPos() {
         const xIn = posXDisplay.value;
         const yIn = posYDisplay.value;
         if (validateFloat([xIn, yIn])) {
-            balls[currentBallIndex()].posRealX = parseFloat(xIn);
-            balls[currentBallIndex()].posRealY = parseFloat(yIn);
-            balls[currentBallIndex()].startPosX = parseFloat(xIn);
-            balls[currentBallIndex()].startPosY = parseFloat(yIn);
-
+            if (parseFloat(yIn) < 0) {
+                // Cannot input height below the ground level
+                window.alert("Cannot input height below the ground level");
+            } else {
+                balls[currentBallIndex()].posRealX = parseFloat(xIn);
+                balls[currentBallIndex()].posRealY = parseFloat(yIn);
+                balls[currentBallIndex()].startPosX = parseFloat(xIn);
+                balls[currentBallIndex()].startPosY = parseFloat(yIn);
+            }
             // Draw ball at new position
             balls[currentBallIndex()].draw();
             // Print out new data
@@ -521,7 +600,6 @@ function setVelRect() {
             balls[currentBallIndex()].startVelY = parseFloat(yIn);
             balls[currentBallIndex()].velX = parseFloat(xIn);
             balls[currentBallIndex()].velY = parseFloat(yIn);
-
             // Draw ball at new position
             balls[currentBallIndex()].draw();
             // Print out new data
@@ -531,17 +609,14 @@ function setVelRect() {
 }
 
 // Set initial polar velocity
-function setVelPolar() {
+function setVelPolar(speedIn = speedDisplay.value, angleIn = angleDisplay.value) {
     // Only allow changes when simulation is paused
     if (isRunning == false) {
-        const speedIn = speedDisplay.value;
-        const angleIn = angleDisplay.value;
         if (validateFloat([speedIn]) && validateAngle([angleIn])) {
             balls[currentBallIndex()].startVelX = Math.cos(rad(angleIn)) * speedIn;
             balls[currentBallIndex()].startVelY = Math.sin(rad(angleIn)) * speedIn;
             balls[currentBallIndex()].velX = balls[currentBallIndex()].startVelX;
             balls[currentBallIndex()].velY = balls[currentBallIndex()].startVelY;
-
             // Draw ball at new position
             balls[currentBallIndex()].draw();
             // Print out new data
@@ -578,10 +653,45 @@ function showVectors() {
         balls[currentBallIndex()].draw();
     }
 }
+
+function preset1() {
+    if (!isRunning) {
+        if (validateFloat([document.getElementById("preset1-speed").value, document.getElementById("preset1-angle").value])) {
+            balls[currentBallIndex()].posRealX = 0;
+            balls[currentBallIndex()].posRealY = 0;
+            balls[currentBallIndex()].startPosX = 0;
+            balls[currentBallIndex()].startPosY = 0;
+            setVelPolar(parseFloat(document.getElementById("preset1-speed").value), parseFloat(document.getElementById("preset1-angle").value));
+            // Draw ball at new position
+            drawAll();
+            // Print out new data
+            printData();
+        }
+    }
+}
+
+function preset2() {
+    if (!isRunning) {
+        if (validateFloat([document.getElementById("preset2-speed").value, document.getElementById("preset2-height").value])) {
+            balls[currentBallIndex()].posRealX = 0;
+            balls[currentBallIndex()].posRealY = parseFloat(document.getElementById("preset2-height").value);
+            balls[currentBallIndex()].startPosX = 0;
+            balls[currentBallIndex()].startPosY = balls[currentBallIndex()].posRealY;
+            balls[currentBallIndex()].velX = parseFloat(document.getElementById("preset2-speed").value);
+            balls[currentBallIndex()].startVelX = parseFloat(document.getElementById("preset2-speed").value);
+            balls[currentBallIndex()].velY = 0;
+            balls[currentBallIndex()].startVelY = 0;
+            // Draw ball at new position
+            drawAll();
+            // Print out new data
+            printData();
+        }
+    }
+}
 //#endregion ----------------------------------------------------------------------------------------------------
 
 
-//#region ---------------------------------------GRAPHS-------------------------------------------------------
+//#region ---------------------------------------GRAPHS------------------------------------------------------
 // Start graph data collection
 function startGraph() {
     // Ensures graph axes cannot be changed during animation
@@ -589,42 +699,41 @@ function startGraph() {
         graphX = document.getElementById("x-axis").value;
         graphY = document.getElementById("y-axis").value;
         graphExists = true;
-        // Create graph
-        graphData = new Graph(graphX, graphY);
         // Reset graph data
-        graphData.data.datasets[0].data = [];
+        graphData = [];
     }
 }
 
 // Collect graph data
-function collectGraphData(time) {
+function collectGraphData(time, ballID) {
     // New data point to be appended to graph
     let newDataPoint = {
-        x: null,
-        y: null
+        x: Number,
+        y: Number
     };
 
+    // Add new data to data point depending on chosen parameters
     switch (graphX) {
         case "time":
             newDataPoint.x = time;
             break;
         case "x-position":
-            newDataPoint.x = balls[0].posRealX;
+            newDataPoint.x = balls[currentBallIndex(ballID)].posRealX;
             break;
         case "y-position":
-            newDataPoint.x = balls[0].posRealY;
+            newDataPoint.x = balls[currentBallIndex(ballID)].posRealY;
             break;
         case "x-velocity":
-            newDataPoint.x = balls[0].velX;
+            newDataPoint.x = balls[currentBallIndex(ballID)].velX;
             break;
         case "y-velocity":
-            newDataPoint.x = balls[0].velY;
+            newDataPoint.x = balls[currentBallIndex(ballID)].velY;
             break;
         case "speed":
-            newDataPoint.x = balls[0].speed;
+            newDataPoint.x = balls[currentBallIndex(ballID)].speed;
             break;
         case "angle":
-            newDataPoint.x = balls[0].angle;
+            newDataPoint.x = balls[currentBallIndex(ballID)].angle;
             break;
     }
     
@@ -633,50 +742,68 @@ function collectGraphData(time) {
             newDataPoint.y = time;
             break;
         case "x-position":
-            newDataPoint.y = balls[0].posRealX;
+            newDataPoint.y = balls[currentBallIndex(ballID)].posRealX;
             break;
         case "y-position":
-            newDataPoint.y = balls[0].posRealY;
+            newDataPoint.y = balls[currentBallIndex(ballID)].posRealY;
             break;
         case "x-velocity":
-            newDataPoint.y = balls[0].velX;
+            newDataPoint.y = balls[currentBallIndex(ballID)].velX;
             break;
         case "y-velocity":
-            newDataPoint.y = balls[0].velY;
+            newDataPoint.y = balls[currentBallIndex(ballID)].velY;
             break;
         case "speed":
-            newDataPoint.y = balls[0].speed;
+            newDataPoint.y = balls[currentBallIndex(ballID)].speed;
             break;
         case "angle":
-            newDataPoint.y = balls[0].angle;
+            newDataPoint.y = balls[currentBallIndex(ballID)].angle;
             break;
     }
-
     // Add new data point to data array
-    graphData.data.datasets[0].data.push(newDataPoint);
+    graphData.push(newDataPoint);
 }
 
 // Draw graph
 function drawGraph() {
     const context = document.getElementById("chart");
-    let chart = new Chart(context, graphData);
+    let chart = new Chart(
+        context, new Graph(graphX, graphY, graphY + " against " + graphX + " for ball " + graphBallID, graphData)
+    );
 }
 
 // Delete graph
 function resetGraph() {
-    document.getElementById("graph-container").innerHTML = "";
-    document.getElementById("graph-container").innerHTML = "<canvas id=\"chart\" class=\"chart\"></canvas>";
-    graphData = null;
+    graphX = "x";
+    graphY = "y";
+    graph.chart.data.datasets[0].data = [];
+    document.getElementById("graph-container").innerHTML = '<canvas id="chart" class="chart"></canvas>';
+    drawGraph();
 }
+
+// When ball is selected
+$(document).ready(function() {
+    $("#ball-graph-select").on("change", function() {
+        document.getElementById("ball-graph-select").style.backgroundColor = balls[parseInt(document.getElementById("ball-graph-select").value)].color;
+    });
+});
 //#endregion ----------------------------------------------------------------------------------------------------
 
 
 //#region -----------------------------------DRAG AND DROP BALL-----------------------------------------------
-function drag(event) {
+function dragBall(event) {
     // Only allow dragging if simulation is paused
     if (isRunning == false) {
-        if ((event.clientX < (balls[currentBallIndex()].posX + balls[currentBallIndex()].radius + canvasMargin)) && (event.clientX > (balls[currentBallIndex()].posX - balls[currentBallIndex()].radius + canvasMargin))) {
-            if ((event.clientY < (balls[currentBallIndex()].posY + balls[currentBallIndex()].radius + canvasMargin)) && (event.clientY > (balls[currentBallIndex()].posY - balls[currentBallIndex()].radius + canvasMargin))) {
+        if (
+            (event.clientX < (balls[currentBallIndex()].posX + balls[currentBallIndex()].radius + canvasMargin))
+            &&
+            (event.clientX > (balls[currentBallIndex()].posX - balls[currentBallIndex()].radius + canvasMargin))
+        ) {
+            if (
+                (event.clientY < (balls[currentBallIndex()].posY + balls[currentBallIndex()].radius + canvasMargin)) 
+                && 
+                (event.clientY > (balls[currentBallIndex()].posY - balls[currentBallIndex()].radius + canvasMargin))
+            ) {
                 // Execute mousemove when clicked
                 mousemove(event);
                 document.body.addEventListener("mousemove", mousemove);
@@ -774,16 +901,24 @@ function line(x1, y1, x2, y2, context, color = "black") {
 function arrow(x1, y1, x2, y2, context, color) {
     context.beginPath();
     const headLength = 10;
+    // Angle head of arrow makes with line
     const headAngle = 30;
+    // Angle arrow makes with horizontal
     const angle = deg(Math.atan2(y2 - y1, x2 - x1));
     context.strokeStyle = color;
     context.moveTo(x1, y1);
     context.lineTo(x2, y2);
     // Rotate headAngle degrees, draw line with length headLength
-    context.lineTo(x2 - headLength * Math.cos(rad(angle - headAngle)), y2 - headLength * Math.sin(rad(angle - headAngle)));
+    context.lineTo(
+        x2 - headLength * Math.cos(rad(angle - headAngle)),
+        y2 - headLength * Math.sin(rad(angle - headAngle))
+    );
     context.moveTo(x2, y2);
     // Rotate headAngle degrees the other way, draw line with length headLength
-    context.lineTo(x2 - headLength * Math.cos(rad(angle + headAngle)), y2 - headLength * Math.sin(rad(angle + headAngle)));        
+    context.lineTo(
+        x2 - headLength * Math.cos(rad(angle + headAngle)),
+        y2 - headLength * Math.sin(rad(angle + headAngle))
+    );        
     context.stroke();
 }
 
@@ -815,7 +950,7 @@ function randomColor() {
     const similarityThreshold = 100000;
     // If appropriate color has been found
     let done = true;
-    // New random color as integer between 0 and 16^4 - 1
+    // New random color as integer between 0 and 16^6 - 1
     let color = Math.floor(Math.random() * (Math.pow(16, 6) - 1));
 
     // Check if any ball's color is similar to selected color
@@ -830,6 +965,33 @@ function randomColor() {
     } else {
         return randomColor();
     }
+}
+
+// Convert decimal number to hex digit
+function hexNum(num) {
+    if (num > 9) {
+        switch(num) {
+            case 10:
+                num = "a";
+                break;
+            case 11:
+                num = "b";
+                break;
+            case 12:
+                num = "c";
+                break;
+            case 13:
+                num = "d";
+                break;
+            case 14:
+                num = "e";
+                break;
+            case 15:
+                num = "f";
+                break;
+        }
+    }
+    return num;
 }
 //#endregion ----------------------------------------------------------------------------------------------------
 
@@ -847,6 +1009,7 @@ function allOffOneOn(on) {
         document.getElementById("ball-selector-" + balls[i].id).style.borderColor = null;
     }
     document.getElementById("ball-selector-" + on).style.borderColor = "green";
+    drawAll();
     printData(timerTime);
 }
 //#endregion ----------------------------------------------------------------------------------------------------

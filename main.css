@@ -58,18 +58,11 @@ input[type=range]#angle-slider {
     grid-template-rows: 70%;
 }
 
-.animation-grid-container {
-}
-
-.graph-container {
-
-}
-
-.chart {
-
-}
-
 .ball-selector {
-    display: none;
-     
+    display: none;    
+}
+
+option:focus{
+    border-color: gray;
+    outline:none;
 }

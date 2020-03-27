@@ -39,9 +39,9 @@ bit of simulation to the next✔
     -make the controls make sense
     -make the controls not look like shit
     -make the graph not look like shit
--Make buttons pretty
 -Remove redundant impact variable✔
+-Setting canvas size to anything that doesn't have a ratio of 2:1 fucks it
 -So it changes for different screen sizes
 -Sliders to change everything
--try doing a "ball is thrown off a cliff at 15ms⁻¹ problem and fix the bullshit
+-try doing a "ball is thrown off a cliff at 15ms⁻¹ problem and fix the bullshit✔
 -Don't forget to make vectors disabled by default

@@ -4,13 +4,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
     <title>index</title>
 </head>
 
 <script src="jquery.min.js"></script>
-<script src="matter.min.js"></script>
 <script src="Chart.min.js"></script>
-<script src="presentation.js"></script>
 <script src="main.js"></script>
 
 <body>
@@ -24,7 +23,7 @@
         </div>
         <div class="container controls" style="display: inline-block;">
             <div id="ball-selector">
-                Select ball:
+                Select Projectile:
                 <button id="ball-selector-0" style="display: inline-block; background-color: black; border-color: green;" onclick="ballSelect(0)">&nbsp</button>
             </div>
             </br>
@@ -37,7 +36,7 @@
             <button id="set-dim" onclick="setDim()">Set Dimensions</button></br>
             </br>
 
-            <h3>Position (drag and drop ball):</h3>
+            <h3>Position (drag and drop projectile):</h3>
             x:<input type="text" id="posx">m</br> 
             y:<input type="text" id="posy">m</br>
             <button id="set-pos" onclick="setPos()">Set Position</button></br>
@@ -55,6 +54,13 @@
             <input type="range" min="25" max="25" value="22.14" class="slider" id="vely-slider">
             <button id="set-vel-rect" onclick="setVelRect()">Set Velocity (rect.)</button></br>
             </br>
+            <!--
+            <h3>Other properties</h3>
+            Net force: <input type="text">N</br>
+            Angle of force: <input type="text">°</br>
+            KE: <input type="text">J</br>
+            GPE: <input type="text">J</br>
+            Air resistance: <input type="text">N</br>-->
         </div>
     </div></br>
     <button id="play" onclick="startClick()"><img src="https://img.icons8.com/flat_round/64/000000/play.png"></button>
@@ -64,13 +70,30 @@
     <button id="reset-timer" onclick="resetTimer()">Reset Timer</button>
     <input type="checkbox" id="trail">Show Trail
     <button id="clear-trail" onclick="clearTrail()">Clear Trail</button>
-    <input type="checkbox" id="vectors" onclick="showVectors()" checked>Show Velocity Vectors
+    <input type="checkbox" id="vectors" onclick="showVectors()" checked>Show Velocity Vectors<!--<img style="height: 20px;" src="https://img.icons8.com/flat_round/64/000000/question-mark.png"/>-->
     <button id="new-ball" onclick="newBall()">Create New Ball</button>
-    <button id="new-ball" onclick="deleteBall()">Delete ball</button>
+    <button id="new-ball" onclick="deleteBall()">Delete ball</button></br>
+    Presets:
+    <div style="display: inline-block; border: 1px solid; padding: 1px;">
+        Ball fired from ground at an angle:
+        <input type="text" id="preset1-angle" value="45">°
+        <input type="text" id="preset1-speed" value="10">ms⁻¹
+        <button onclick="preset1()">Choose preset</button>
+    </div> 
+    <div style="display: inline-block; border: 1px solid; padding: 1px;">
+        Ball fired from a cliff of height:
+        <input type="text" id="preset2-height" value="15">m&nbsp
+        <input type="text" id="preset2-speed" value="10">ms⁻¹
+        <button onclick="preset2()">Choose preset</button>
+    </div> 
     </br></br>
     <div class="graph-grid-container">
         <div class="graph-controls">
-            <h3>Graph axes</h3>
+            <h3>Graph settings</h3>
+            Projectile:</br>
+            <select style="background-color: black;" id="ball-graph-select">
+                <option id="ball-graph-select-option-0" style="background-color: black;" value="0"></option>
+            </select></br>
             X-Axis:</br>
             <select id="x-axis">
                 <option value="time">Time</option>
@@ -93,11 +116,18 @@
             </select></br></br>
             <button id="graph-start" onclick="startGraph()">Start Graph</button>
             <button id="draw-graph" onclick="drawGraph()">Draw Graph</button>
-            <button id="reset-graph" onclick="resetGraph()">Reset Graph</button>
+            <button id="reset-graph" onclick="resetGraph()">Reset Graph</button></br>
+            <p>
+                To begin drawing graph, select the projectile for which you'd like to collect the data, choose the axes and press start graph.</br>
+                To draw the graph you have started collecting data for, press draw graph.</br>
+                To reset the data for the graph and select new axes, press reset graph.
+            </p>
         </div>
         <div id="graph-container" class="graph-container">
             <canvas id="chart" class="chart"></canvas>
         </div>
+        </div>
     </div>
+    </br>
 </body>
 </html>
