@@ -8,10 +8,13 @@
 
 .navbar a { color: white; }
 
-.content { background-color: aqua; }
+.content, aside { 
+    background-color: #0072bb;
+    color: white; 
+}
 
 .top-bar { overflow: hidden; }
 
-.aside {
+h5 { font-weight: bold; }
 
-}
+aside { background-color: #2589bd; }

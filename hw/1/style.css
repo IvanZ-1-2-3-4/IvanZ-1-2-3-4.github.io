@@ -2,20 +2,19 @@
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
-.seo {
-    color: #d9dcd6;
-}
+.seo { color: #d9dcd6; }
 
-.navbar {
-    background-color: #2a607c;
-}
+.navbar { background-color: #2a607c; }
 
 .navbar a { color: white; }
 
-.content {
-    background-color: aqua;
+.content, aside { 
+    background-color: #0072bb;
+    color: white; 
 }
 
-.aside {
+.top-bar { overflow: hidden; }
 
-}
+h5 { font-weight: bold; }
+
+aside { background-color: #2589bd; }
