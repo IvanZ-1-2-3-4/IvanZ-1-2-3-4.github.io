@@ -1,58 +1,96 @@
-<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Password Generator</title>
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-    <script src="script.js" defer></script>
-  </head>
-  <body>
-    <div id='modal' class="modal">
-      <div class="modal-content">
-        <header class='header'>Enter Parameters</header>
-        <!-- FORM -->
-        <div class='form'>
-          <div class="input-group">
-            <h4>Number of characters in password (must be beween 8 and 128 characters)</h4>
-            <input id='length' name='length' type="number" min='8' max='128'>
-            <div id='length-error' class='error' style='display: none;'>Enter a value between 8 and 128.</div>
-          </div>
-          <div class="input-group">
-            <h4>Types of characters in password (at least one must be selected)</h4>
-            <div class="checkbox-container"><input type="checkbox" id='numeric' name='numeric'><label for="numeric">Numeric</label></div>
-            <div class="checkbox-container"><input type="checkbox" id='lowercase' name='lowercase'><label for="lowercase">Lowercase</label></div>
-            <div class="checkbox-container"><input type="checkbox" id='uppercase' name='uppercase'><label for="uppercase">Uppercase</label></div>
-            <div class="checkbox-container"><input type="checkbox" id='special' name='special'><label for="special">Special</label></div>
-            <div id='checkbox-error' class='error' style='display: none;'>At least one option must be selected.</div>
-          </div>
-          <button type='button' id='generate' onclick="generate()">Generate</button>
-        </div>
-      </div>
-    </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Quiz</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src='script.js' defer></script>
+    <style>
+        .hide {
+            display: none;
+            opacity: 1;
+        }
 
-    <div class="wrapper">
-      <header>
-        <h1>Password Generator</h1>
-      </header>
-      <div class="card">
-        <div class="card-header">
-          <h2>Generate a Password</h2>
-        </div>
-        <div class="card-body">
-          <textarea
-            readonly
-            id="password"
-            placeholder="Your Secure Password"
-            aria-label="Generated Password"
-          ></textarea>
-        </div>
-        <div class="card-footer">
-          <button id='configure' onclick='configureParameters()' class="btn">Configure</button>
-        </div>
-      </div>
+        .fade {
+            display: inline-block;
+            animation: fade-keyframes 3s;
+        }
+
+        @keyframes fade-keyframes {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <p class="hide">DANGER</p>
+    <div class="card p-1" id="begin" style='display: block;'>
+        <h1>Code Quiz</h1>
+        <p class="subtitle">
+            You will have X to complete all of the questions. There are Y questions. Answering a question wrong takes away Z seconds from your time, so answer wisely!
+        </p>
+        <button class="button d-block mb-3" id="button-begin" onclick="quiz()">Begin</button>
+        <a href="#" onclick='scoreBoard()'>View Scoreboard</a>
     </div>
-  </body>
+    <main class="card p-1" id='question-card' style='display: none;'>
+        <h2 class="question" id="question"></h2>
+        <div class="options" id="options">
+            <button class="button option d-block" id="1"></button>
+            <button class="button option d-block" id="2"></button>
+            <button class="button option d-block" id="3"></button>
+            <button class="button option d-block" id="4"></button>
+        </div>
+        <div class="answer" id="answers"></div>
+        <p class='mt-3'>Time Left:</p>
+        <div class="timer mx-1" style='display: inline-block;' id="timer"></div>
+        <div class="text-success mx-1 hide" id='correct'>Correct!</div>
+        <div class="text-danger mx-1 hide" id='incorrect'>Incorrect. -Z seconds.</div>
+    </main>
+    <div id="quiz-end" class=' p-1' style="display: none;">
+        <h2>You've completed the quiz</h2>
+        <p id="score-display"></p>
+        <p id='time-display'></p>
+        <p id='ranking-display'></p>
+        <p class='d-block'>Save your results:</p>
+        <div class="container m-0 p-0">
+            <div id="leaderboard-form" class='col-lg-4 col-md-5 col-sm-7 col-9 m-0 p-0'>
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" placeholder="Your Name (leave blank for anonymous)" maxlength="50" id='name-input'>
+                </div>
+            </div>
+            <div class="col"></div>
+        </div>
+        <button class='d-block mb-3' onclick='formSubmit()'>Save Results</button>
+        <div id="user-exists" style='display: none' class='my-1' data-namein>
+            <p id="user-exists-prompt"></p>
+            <button onclick='formSubmit(userNew=false)'>Yes, this is me</button>
+        </div>
+        <a href="#" onclick='scoreBoard()'>I don't want to save my results, take me to the scoreboard.</a>
+    </div>
+    <div class="card p-1" id="scoreboard" style='display: none;'>
+        <h1>Scoreboard</h1>
+        <div id="scoreboard-board">
+            <div id="scoreboard-header" class='my-1'>
+                Page: <u><span id="pages"></span></u>
+            </div>
+            <table id="scoreboard-table" class='table'>
+                <thead>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Time left</th>
+                    <th scope="col">Completed on</th>
+                </thead>
+                <tbody id='scoreboard-table-body'>
+                    
+                </tbody>
+            </table>
+            <a href="#" onclick="quiz()"> Begin Quiz</a>
+        </div>
+    </div>
+</body>
 </html>
