@@ -50,6 +50,7 @@ let timer
 let dateFinished
 
 document.querySelectorAll('.option').forEach(elem => elem.addEventListener('click', answer))
+document.querySelector('.subtitle').innerHTML = `You will have ${totalTimeSec} seconds to complete all of the questions. There are ${JSON.parse(questionsBank).length} questions. Answering a question wrong takes away ${10} seconds from your time, so answer wisely!`
 
 // begin quiz
 function quiz() {
