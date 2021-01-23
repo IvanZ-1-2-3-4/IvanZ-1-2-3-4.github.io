@@ -341,16 +341,18 @@ function setPositionOnEntries(sb) {
 // ---------------------------------------------
 
 
-function shuffle(array) {
-    let currentIndex = array.length, temporaryValue, randomIndex
-    while (0 !== currentIndex) {
-      randomIndex = Math.floor(Math.random() * currentIndex)
-      currentIndex -= 1
-  
-      temporaryValue = array[currentIndex]
-      array[currentIndex] = array[randomIndex]
-      array[randomIndex] = temporaryValue
+function shuffle(arr) {
+    let current = arr.length
+    let tempVal 
+    let ran
+    while (0 != current) {
+        ran = Math.floor(Math.random() * current)
+        current -= 1
+
+        tempVal = arr[current]
+        arr[current] = arr[ran]
+        arr[ran] = tempVal
     }
-    return array
+    return arr
   }
   
