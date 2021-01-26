@@ -1,3 +1,3 @@
-# code-quiz
+# Scheduler
 
-Test yourself on your knowledge of JavaScript with this quiz.
+Use this simple scheduler to schedule your day.

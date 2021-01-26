@@ -1,107 +1,87 @@
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Quiz</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <script src='script.js' defer></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+      integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>Work Day Scheduler</title>
     <style>
-        .hide {
-            display: none;
-            opacity: 1;
-        }
 
-        .fade {
-            display: inline-block;
-            animation: fade-keyframes 3s;
-        }
-
-        @keyframes fade-keyframes {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-            }
-        }
     </style>
-</head>
-<body>
-    <div class='bg-info' id="cache" style='display: block;'>Please clear your cache as it might have the script from my previous <button class="button btn" onclick='cacheBtn()'>I've cleared the cache.</button></div>
-    <p class="hide">DANGER</p>
-    <div class="card p-1" id="begin" style='display: block;'>
-        <h1>Code Quiz</h1>
-        <p class="subtitle">
-            
-        </p>
-        <button class="button d-block mb-3" id="button-begin" onclick="quiz()">Begin</button>
-        <a href="#" onclick='scoreBoard()'>View Scoreboard</a>
-    </div>
-    <main class="card p-1" id='question-card' style='display: none;'>
-        <h2 class="question" id="question"></h2>
-        <div class="options" id="options">
-            <button class="button option d-block" id="1"></button>
-            <button class="button option d-block" id="2"></button>
-            <button class="button option d-block" id="3"></button>
-            <button class="button option d-block" id="4"></button>
-        </div>
-        <div class="answer" id="answers"></div>
-        <p class='mt-3'>Time Left:</p>
-        <div class="timer mx-1" style='display: inline-block;' id="timer"></div>
-        <div class="text-success mx-1 hide" id='correct'>Correct!</div>
-        <div class="text-danger mx-1 hide" id='incorrect'>Incorrect. -Z seconds.</div>
-    </main>
-    <div id="quiz-end" class=' p-1' style="display: none;">
-        <h2>You've completed the quiz</h2>
-        <p id="score-display"></p>
-        <p id='time-display'></p>
-        <p id='ranking-display'></p>
-        <p class='d-block'>Save your results:</p>
-        <div class="container m-0 p-0">
-            <div id="leaderboard-form" class='col-lg-4 col-md-5 col-sm-7 col-9 m-0 p-0'>
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" placeholder="Your Name (leave blank for anonymous)" maxlength="50" id='name-input'>
-                </div>
-            </div>
-            <div class="col"></div>
-        </div>
-        <button class='d-block mb-3' onclick='formSubmit()'>Save Results</button>
-        <div id="user-exists" style='display: none' class='my-1' data-namein>
-            <p id="user-exists-prompt"></p>
-            <button onclick='formSubmit(userNew=false)'>Yes, this is me</button>
-        </div>
-        <a href="#" onclick='scoreBoard()'>I don't want to save my results, take me to the scoreboard.</a>
-    </div>
-    <div class="card p-1" id="scoreboard" style='display: none;'>
-        <h1>Scoreboard</h1>
-        <div id="scoreboard-board">
-            <div id="scoreboard-header" class='my-1'>
-                Page: <u><span id="pages"></span></u>
-            </div>
-            <table id="scoreboard-table" class='table'>
-                <thead>
-                    <th scope="col">#</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Score</th>
-                    <th scope="col">Time left</th>
-                    <th scope="col">Completed on</th>
-                </thead>
-                <tbody id='scoreboard-table-body'>
-                    
-                </tbody>
-            </table>
-            <a href="#" onclick="quiz()"> Begin Quiz</a>
-        </div>
-    </div>
-    <script>
-        if (localStorage.getItem('cacheclear')) {
-            document.getElementById('cache').style.display = 'none'
-        }
+  </head>
 
-        function cacheBtn() {
-            localStorage.setItem('cacheclear', 'clear')
-            document.getElementById('cache').style.display = 'none'
-        }
-    </script>
-</body>
+  <body>
+    <header class="jumbotron">
+      <h1 class="display-3">Work Day Scheduler</h1>
+      <p class="lead">A simple calendar app for scheduling your work day</p>
+      <p id="currentDay" class="lead"></p>
+    </header>
+    <div class="container">
+      <div class='row w-100' id='9am'>
+        <div class="hour float-left py-1">9am</div>
+        <textarea id='9am'></textarea>
+        <button class="save float-right" id='9am'>Save</button>
+      </div>
+      <div class='row' id='10am'>
+        <div class="hour float-left py-1">10am</div>
+        <textarea id='10am'></textarea>
+        <button class="save float-right" id='10am'>Save</button>
+      </div>
+      <div class='row' id='11am'>
+        <div class="hour float-left py-1">11am</div>
+        <textarea id='11am'></textarea>
+        <button class="save float-right" id='11am'>Save</button>
+      </div>
+      <div class='row' id='12pm'>
+        <div class="hour float-left py-1">12pm</div>
+        <textarea id='12pm'></textarea>
+        <button class="save float-right" id='12pm'>Save</button>
+      </div>
+      <div class='row' id='1pm'>
+        <div class="hour float-left py-1">1pm</div>
+        <textarea id='1pm'></textarea>
+        <button class="save float-right" id='1pm'>Save</button>
+      </div>
+      <div class='row' id='2pm'>
+        <div class="hour float-left py-1">2pm</div>
+        <textarea id='2pm'></textarea>
+        <button class="save float-right" id='2pm'>Save</button>
+      </div>
+      <div class='row' id='3pm'>
+        <div class="hour float-left py-1">3pm</div>
+        <textarea id='3pm'></textarea>
+        <button class="save float-right" id='3pm'>Save</button>
+      </div>
+      <div class='row' id='4pm'>
+        <div class="hour float-left py-1">4pm</div>
+        <textarea id='4pm'></textarea>
+        <button class="save float-right" id='4pm'>Save</button>
+      </div>
+      <div class='row' id='5pm'>
+        <div class="hour float-left py-1">5pm</div>
+        <textarea id='5pm'></textarea>
+        <button class="save float-right" id='5pm'>Save</button>
+      </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script src="script.js" defer></script>
+  </body>
 </html>
