@@ -1,0 +1,63 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribution Drawer</title>
+    <script src="main.js"></script>
+    <style>
+        canvas {
+            border: 1px solid;
+        }
+
+        .grid-container-1 {
+            display: grid;
+            grid-template-columns: 33% 33% 33%;
+            width: 50%;
+        }
+
+        .grid-container-2 {
+            display: grid;
+            grid-template-columns: 50% 50%;
+            grid-template-rows: 50% 50%;
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="base-layer" style="position: relative; left: 0; top: 0; z-index: 0;" width="1000px" height="500px"></canvas>
+    <canvas id="grid-layer" class="b" style="position: absolute; left: 8; top: 8; z-index: 1;" width="1000px" height="500px"></canvas>
+    <canvas id="line-layer" class="b" style="position: absolute; left: 8; top: 8; z-index: 2;" width="1000px" height="500px"></canvas>
+
+    <div class="grid-container-1">
+        <div>
+            <p id="value">x=null</br>y=null</p>
+        </div>
+        <div>
+            <p id="gridline-value">Number of gridlines=20</p>
+            <input type="range" min="0" max="50" value="20" id="gridline-slider">
+        </div>
+        <div>
+            <p><a id="download" href="">Download distribution csv</a></p>
+        </div>
+    </div>
+    
+    <div class="grid-container-2">
+        <div>
+            <p>High y</p>
+            <input onchange='boundaryChange("hy")' type="text" id="highy" value="1"></br>
+        </div>
+        <div>
+            <p>High x</p>
+            <input onchange='boundaryChange("hx")' type="text" id="highx" value="1"></br>
+        </div>
+        <div>
+            <p>Low y</p>
+            <input onchange='boundaryChange("ly")' type="text" id="lowy" value="0">
+        </div>
+        <div>
+            <p>Low x</p>
+            <input onchange='boundaryChange("lx")' type="text" id="lowx" value="0"></br>
+        </div>
+    </div>
+</body>
+</html>
