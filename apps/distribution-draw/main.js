@@ -42,7 +42,7 @@ function draw(event) {
     xVals = `${xVals},${x}`
     yVals = `${yVals},${y}`
     
-    const blob = new Blob([`${xVals}\n${yVals}`], {type : 'text/csv'})
+    const blob = new Blob([`${xVals.join(', ')}\n${yVals.join(', ')}`], {type : 'text/csv'})
     download.href = (window.webkitURL || window.URL).createObjectURL(blob)
     download.dataset.downloadurl = ['text/csv', download.download, download.href].join(':')
 }
