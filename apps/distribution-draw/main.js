@@ -8,7 +8,8 @@ let xVals = '"x"',
     highY = 1,
     lowY = 0,
     highX = 1,
-    lowX = 0
+    lowX = 0,
+    dotSize = 2
 
 window.onload = function() {
     document.getElementById('line-layer').addEventListener("mousedown", (event) => {
@@ -20,7 +21,13 @@ window.onload = function() {
     download.download = 'distribution.csv'
     distrDisplay = document.getElementById('value')
     document.getElementById("gridline-slider").oninput = gridlineSliderInput
+    document.getElementById("dotsize-slider").oninput = dotsizeSliderInput
     drawGridlines()
+}
+
+function dotsizeSliderInput() {
+    dotSize = parseInt(this.value)
+    document.getElementById('dotsize-value').innerHTML = `Dot size=${dotSize}`
 }
 
 function gridlineSliderInput() {
@@ -33,7 +40,8 @@ function draw(event) {
     let c = document.getElementById('line-layer')
     ctx = c.getContext('2d')
     ctx.fillStyle = '000000'
-    ctx.fillRect(event.clientX, event.clientY, 1, 1)
+
+    ctx.fillRect(event.clientX, event.clientY, dotSize, dotSize)
 
     let x = lowX + (event.clientX / canvasWidth) * (highX - lowX)
     let y = lowY + ((canvasHeight - event.clientY) / canvasHeight) * (highY - lowY)
@@ -42,7 +50,10 @@ function draw(event) {
     xVals = `${xVals},${x}`
     yVals = `${yVals},${y}`
     
-    const blob = new Blob([`${xVals.join(', ')}\n${yVals.join(', ')}`], {type : 'text/csv'})
+    const blob = new Blob(
+        [`${xVals.join ? xVals.join(', ') : null}\n${yVals.join ? yVals.join(', ') : null}`], 
+        {type : 'text/csv'}
+    )
     download.href = (window.webkitURL || window.URL).createObjectURL(blob)
     download.dataset.downloadurl = ['text/csv', download.download, download.href].join(':')
 }
