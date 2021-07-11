@@ -21,6 +21,12 @@
             grid-template-rows: 50% 50%;
             width: 50%;
         }
+
+        .start-button {
+            background-color: green;
+            size: 2rem;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -44,19 +50,19 @@
     <div class="grid-container-2">
         <div>
             <p>High y</p>
-            <input onchange='boundaryChange("hy")' type="text" id="highy" value="1"></br>
+            <input onchange='changeParam("hy")' type="text" id="highy" value="1"></br>
         </div>
         <div>
             <p>High x</p>
-            <input onchange='boundaryChange("hx")' type="text" id="highx" value="1"></br>
+            <input onchange='changeParam("hx")' type="text" id="highx" value="1"></br>
         </div>
         <div>
             <p>Low y</p>
-            <input onchange='boundaryChange("ly")' type="text" id="lowy" value="0">
+            <input onchange='changeParam("ly")' type="text" id="lowy" value="0">
         </div>
         <div>
             <p>Low x</p>
-            <input onchange='boundaryChange("lx")' type="text" id="lowx" value="0"></br>
+            <input onchange='changeParam("lx")' type="text" id="lowx" value="0"></br>
         </div>
     </div>
 </body>
