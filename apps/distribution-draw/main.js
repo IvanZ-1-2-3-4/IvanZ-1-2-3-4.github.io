@@ -47,11 +47,11 @@ function draw(event) {
     let y = lowY + ((canvasHeight - event.clientY) / canvasHeight) * (highY - lowY)
 
     distrDisplay.innerHTML = `x=${x}</br>y=${y}`
-    xVals = `${xVals},${x}`
-    yVals = `${yVals},${y}`
+    xVals = `${xVals}, ${x}`
+    yVals = `${yVals}, ${y}`
     
     const blob = new Blob(
-        [`${xVals.join ? xVals.join(', ') : null}\n${yVals.join ? yVals.join(', ') : null}`], 
+        [`${xVals}\n${yVals}`], 
         {type : 'text/csv'}
     )
     download.href = (window.webkitURL || window.URL).createObjectURL(blob)
